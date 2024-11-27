@@ -1,7 +1,8 @@
 import psycopg2
-
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+DB_NAME = "bbal_db_tester_07"
 
 def create_db():
     con = psycopg2.connect(
@@ -11,7 +12,7 @@ def create_db():
         password="123",
         port="5532"
     )
-    dbname = "bbal_db_tester_05"
+    dbname = DB_NAME
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
 
@@ -292,7 +293,7 @@ def generate_pid(name):
 def add_to_db(columns):
     con = None
     con=psycopg2.connect(
-        database="bbal_db_tester_05",
+        database=DB_NAME,
         user="brianpark",
         host="localhost",
         password="123",
