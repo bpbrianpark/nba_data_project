@@ -3,54 +3,72 @@ import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-# con = None
-
 def create_db():
-    con = None
-    con=psycopg2.connect(
+    con = psycopg2.connect(
         database="postgres",
         user="brianpark",
         host="localhost",
         password="123",
         port="5532"
     )
-    dbname = "bbal_db_tester_1"
-        
-    # autocommit ends transaction after every query
+    dbname = "bbal_db_tester_00"
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
-    cur.execute('CREATE DATABASE ' + dbname)
-    cur.execute("""CREATE TABLE players2024(
-                name VARCHAR(50) NOT NULL,
-                age INTEGER NOT NULL,
-                team VARCHAR(50) NOT NULL,
-                pos VARCHAR(50) NOT NULL,
-                gamesPlayed INTEGER NOT NULL,
-                gamesStarted INTEGER NOT NULL,
-                minutes DECIMAL,
-                fg DECIMAL(4,2),
-                fga DECIMAL(4,2),
-                fgp DECIMAL(4,3),
-                threep DECIMAL(4,2),
-                threepa DECIMAL(4,2),
-                threepp DECIMAL(4,3),
-                twop DECIMAL(4,2),
-                twopa DECIMAL(4,2),
-                twopp DECIMAL(4,3),
-                efg DECIMAL(4,3),
-                ft DECIMAL(4,2),
-                fta DECIMAL(4,2),
-                ftp DECIMAL(4,3),
-                orb DECIMAL(4,2),
-                drb DECIMAL(4,2),
-                trb DECIMAL(4,2),
-                ast DECIMAL(4,2),
-                stl DECIMAL(4,2),
-                blk DECIMAL(4,2),
-                tov DECIMAL(4,2),
-                pf DECIMAL(4,2),
-                pts DECIMAL(4, 2));
-                """)
+
+    # Create the database
+    cur.execute(f"SELECT 1 FROM pg_database WHERE datname = '{dbname}'")
+    exists = cur.fetchone()
+    if not exists:
+        cur.execute(f"CREATE DATABASE {dbname}")
+    print(f"Database {dbname} is ready.")
+
+    # Connect to the newly created database
+    con.close()
+    con = psycopg2.connect(
+        database=dbname,
+        user="brianpark",
+        host="localhost",
+        password="123",
+        port="5532"
+    )
+    cur = con.cursor()
+
+    # Create the table
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS players2024(
+            name VARCHAR(50) NOT NULL,
+            age INTEGER NOT NULL,
+            team VARCHAR(50) NOT NULL,
+            pos VARCHAR(50) NOT NULL,
+            gamesPlayed INTEGER NOT NULL,
+            gamesStarted INTEGER NOT NULL,
+            minutes DECIMAL,
+            fg DECIMAL(4,2),
+            fga DECIMAL(4,2),
+            fgp DECIMAL(4,3),
+            threep DECIMAL(4,2),
+            threepa DECIMAL(4,2),
+            threepp DECIMAL(4,3),
+            twop DECIMAL(4,2),
+            twopa DECIMAL(4,2),
+            twopp DECIMAL(4,3),
+            efg DECIMAL(4,3),
+            ft DECIMAL(4,2),
+            fta DECIMAL(4,2),
+            ftp DECIMAL(4,3),
+            orb DECIMAL(4,2),
+            drb DECIMAL(4,2),
+            trb DECIMAL(4,2),
+            ast DECIMAL(4,2),
+            stl DECIMAL(4,2),
+            blk DECIMAL(4,2),
+            tov DECIMAL(4,2),
+            pf DECIMAL(4,2),
+            pts DECIMAL(4,2)
+        );
+    """)
+
+    # Verify tables
     cur.execute("""
         SELECT table_name
         FROM information_schema.tables
@@ -59,15 +77,18 @@ def create_db():
     tables = cur.fetchall()
     print("Tables in the database:", tables)
     con.commit()
+    cur.close()
+    con.close()
 
 def add_to_db(columns):
     con = None
     con=psycopg2.connect(
-        database="postgres",
+        database="bbal_db_tester_00",
         user="brianpark",
         host="localhost",
         password="123",
-        port="5532"
+        port="5532",
+        options="-c client_encoding=utf8"
     )
     con.commit()
     cur = con.cursor()
@@ -75,7 +96,8 @@ def add_to_db(columns):
     def safe_get(column):
         return column.text.strip() if column.text.strip() else None
     
-    name = safe_get(columns[0])
+    raw_name = safe_get(columns[0])
+    name = raw_name.encode("latin1").decode("utf-8")
     age = int(safe_get(columns[1]) or 0)  # Default age to 0 if missing
     team = safe_get(columns[2])
     pos = safe_get(columns[3])
