@@ -2,7 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 
-# Initialize extensions
 db = SQLAlchemy()
 api = Api()
 
@@ -18,7 +17,7 @@ def create_app():
     api.init_app(app)
 
     # Register routes
-    from app.routes import routes
+    from app.routes import routes  # Import your Blueprint
     app.register_blueprint(routes)
 
-    return app
+    return app  # Ensure the app is returned here

@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from api_helpers import add_to_pergame, add_to_per36, add_to_per100, add_to_advanced, add_to_pbp, add_to_shooting, add_to_adj_shooting, create_db
+from app.scrape.api_helpers import add_to_pergame, add_to_per36, add_to_per100, add_to_advanced, add_to_pbp, add_to_shooting, add_to_adj_shooting, create_db
 
 def is_dupe(prev, curr):
     if (prev == curr):
@@ -62,7 +62,7 @@ def scrape_year_data():
     content = response.text
     soup = BeautifulSoup(content, 'lxml')
     
-    create_db()
+    # create_db()
     # Find all the sections on the page (ex. Per Game, Per 36, Per 100 Possessions)
     sections = soup.find_all('div', class_="filter")
 
@@ -71,10 +71,13 @@ def scrape_year_data():
         table_name = link.text.strip()
         href = link['href'] 
         result_url = f'{root}{href}' 
-        print("Table Name: ", table_name)
-        print("Resulting URL: ", result_url)
         scrape_page(table_name, result_url)
     return ""
 
+def scrape_all_years():
+    return
+
 if __name__ == "__main__":
+    create_db()
     scrape_year_data()
+    # print("Ran.")

@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-DB_NAME = "db_tester_005"
+DB_NAME = "apitest3"
 USER = "brianpark"
 PASSWORD = "123"
 PORT = "5532"
@@ -15,6 +15,7 @@ def create_db():
         password=PASSWORD,
         port=PORT
     )
+    print("Connecting to PostGres")
     dbname = DB_NAME
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
@@ -26,6 +27,8 @@ def create_db():
     print(f"Database {dbname} is ready.")
 
     con.close()
+
+    print("Creating DB: ")
     con = psycopg2.connect(
         database=dbname,
         user=USER,
