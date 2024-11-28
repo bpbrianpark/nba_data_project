@@ -62,7 +62,6 @@ def scrape_year_data():
     content = response.text
     soup = BeautifulSoup(content, 'lxml')
     
-    # create_db()
     # Find all the sections on the page (ex. Per Game, Per 36, Per 100 Possessions)
     sections = soup.find_all('div', class_="filter")
 
@@ -76,8 +75,3 @@ def scrape_year_data():
 
 def scrape_all_years():
     return
-
-if __name__ == "__main__":
-    create_db()
-    scrape_year_data()
-    # print("Ran.")

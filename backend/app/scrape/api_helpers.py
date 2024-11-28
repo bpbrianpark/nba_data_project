@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-DB_NAME = "apitest3"
+DB_NAME = "apitest5"
 USER = "brianpark"
 PASSWORD = "123"
 PORT = "5532"
