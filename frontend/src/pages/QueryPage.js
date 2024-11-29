@@ -78,7 +78,7 @@ const QueryPage = () => {
         });
 
         if (selectedPositions.length > 0) {
-            filtered = filtered.filter((row) => selectedPositions.includes(row.position));
+            filtered = filtered.filter((row) => selectedPositions.includes(row.pos));
         }
 
         setFilteredData(filtered);

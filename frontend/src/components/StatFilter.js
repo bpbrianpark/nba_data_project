@@ -3,6 +3,7 @@ import { Row, Col, Button, Form } from 'react-bootstrap';
 import ApplyFilterButton from './buttons/ApplyFilterButton';
 
 const StatFilter = ({ filters, onAddFilter, onUpdateFilter, positions, selectedPositions, onPositionChange, onApplyFilters }) => {
+
     return (
         <>
             <h5>Filters</h5>
@@ -38,7 +39,7 @@ const StatFilter = ({ filters, onAddFilter, onUpdateFilter, positions, selectedP
                 Add Filter
             </Button>
 
-            <h5>Include Positions</h5>
+            <h5>Positions</h5>
             {positions.map((position) => (
                 <Form.Check
                     key={position}
