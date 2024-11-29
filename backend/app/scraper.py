@@ -2,12 +2,16 @@ import requests
 from bs4 import BeautifulSoup
 from app.api_helpers import add_to_pergame, add_to_per36, add_to_per100, add_to_advanced, add_to_pbp, add_to_shooting, add_to_adj_shooting, create_db
 
-def is_dupe(prev, curr):
+# Given a data entry and the preceding data entry, check if it is valid
+def isValidPlayer(prev, curr):
     if (prev == curr):
-        return True
-    else:
         return False
-    
+    elif (curr == "League Average"):
+        return False
+    else:
+        return True
+
+# Given a table and its columns, determine which table to add to
 def determine_table(name, columns):
     if (name == "Per Game"):
         add_to_pergame(columns)
@@ -33,25 +37,25 @@ def determine_table(name, columns):
     else:
         return
 
+# Webscrape the given page
 def scrape_page(table_name, result_url):
     response = requests.get(result_url)
     content = response.text
     soup = BeautifulSoup(content, 'lxml')
     table = soup.find('table', class_='stats_table')
-    dupe_detector = ""
+    prev_player = ""
     for row in table.tbody.find_all('tr'):
         columns = row.find_all('td')
         if (columns != []):
             name = columns[0].text.strip()
-            lgAvg = "League Average"
-            if (name == dupe_detector): 
-                continue 
-            if (name ==  lgAvg):
+            if (isValidPlayer(prev_player, name)):
+                prev_player = name
+                determine_table(table_name, columns)
+            else:
                 continue
-            dupe_detector = name
-            determine_table(table_name, columns)
     return
 
+# Webscrape all the player data for a given year
 def scrape_year_data():
     # Establish the root website (Basketball Reference)
     root = "https://www.basketball-reference.com"
@@ -73,5 +77,8 @@ def scrape_year_data():
         scrape_page(table_name, result_url)
     return ""
 
+# TODO:
+# Webscrape all the player data for every year
 def scrape_all_years():
+    # Increment from 2003 to 2024
     return

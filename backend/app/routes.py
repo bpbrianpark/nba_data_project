@@ -4,6 +4,7 @@ from app.scraper import scrape_year_data
 
 routes = Blueprint('routes', __name__)
 
+# Create Database Endpoint
 @routes.route('/create_database', methods=['POST'])
 def create_database():
     try:
@@ -11,7 +12,8 @@ def create_database():
         return jsonify({"message": "Database created successfully!"}), 200
     except Exception as e:
         return jsonify({"error": "Failed to create database", "message": str(e)}), 500
-    
+
+# Scrape Database Endpoint 
 @routes.route('/scrape_database', methods=['POST'])
 def scrape_database():
     try:
@@ -20,6 +22,7 @@ def scrape_database():
     except Exception as e:
         return jsonify({"error": "Failed to scrape database", "message": str(e)}), 500
     
+# Get Tables Endpoint 
 @routes.route('/get_table_data/<string:table_name>', methods=['GET'])
 def get_table_data(table_name):
     try:
@@ -33,15 +36,6 @@ def get_table_data(table_name):
         cur.close()
         con.close()
         return jsonify(data), 200
-    except Exception as e:
-        print(f"Error: {e}") 
-        return jsonify({"error": str(e)}), 500
-    
-@routes.route('/get_players/custom', methods=['GET'])
-def get_players_custom():
-    try:
-        con = None
-        return
     except Exception as e:
         print(f"Error: {e}") 
         return jsonify({"error": str(e)}), 500
