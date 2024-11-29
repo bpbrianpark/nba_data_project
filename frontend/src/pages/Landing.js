@@ -51,6 +51,7 @@ const Landing = () => {
                     <p className='text-secondary'>
                         More seasons to come
                     </p>
+                    <Button variant='info' size='lg' onClick={() => navigate('/database')}>Main Page</Button>
                     <Button variant='info' size='lg' onClick={handleCreateDatabase}>
                         Create Database
                         </Button>

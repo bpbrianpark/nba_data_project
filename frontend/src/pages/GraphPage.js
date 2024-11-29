@@ -38,6 +38,7 @@ const GraphPage = () => {
                     <Row>
                         <Col md={6} className="p-4">
                             <h1>Graph Page</h1>
+                            <Button variant='info' size='lg' onClick={() => navigate('/database')}>Query</Button>
                             <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
                             <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
                             <Form.Select

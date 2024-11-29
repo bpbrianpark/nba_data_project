@@ -42,6 +42,7 @@ const MainPage = () => {
                                 Find and filter through basketball statistics for the 2023-2024 NBA season!
                             </p>
                             <p className="text-secondary">More seasons to come</p>
+                            <Button variant='info' size='lg' onClick={() => navigate('/database')}>Main Page</Button>
                             <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
                             <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
                             <Form.Select

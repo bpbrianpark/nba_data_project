@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Navbar, Container, Form } from 'react-bootstrap';
+import { Button, Row, Col, Navbar, Container, Form } from 'react-bootstrap';
 import StatFilter from '../components/StatFilter';
 import DataTable from '../components/DataTable';
+import { useNavigate } from 'react-router-dom';
 import TableSelector from '../components/TableSelector';
 import LoadTableButton from '../components/buttons/LoadTableButton';
 
 const QueryPage = () => {
+    const navigate = useNavigate();
     const [selectedTable, setSelectedTable] = useState(['pergame_2024']);
     const [tableData, setTableData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -102,7 +104,9 @@ const QueryPage = () => {
                                 Find and filter through basketball statistics for the 2023-2024 NBA season!
                             </p>
                             <p className="text-secondary">More seasons to come</p>
-
+                            <Button variant='info' size='lg' onClick={() => navigate('/database')}>Main Page</Button>
+                            <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
+                            <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
                             <Form.Select
                                 value={selectedTable}
                                 onChange={(e) => setSelectedTable(e.target.value)}

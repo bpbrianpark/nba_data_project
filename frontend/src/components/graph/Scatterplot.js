@@ -33,6 +33,7 @@ export const Scatterplot = ({ width, height, data }) => {
         onMouseEnter={() =>
           setHovered({
             xPos: xScale(d.x),
+            yPos: yScale(d.x),
             yPos: yScale(d.y),
             color: colorScale(d.group), // Added color for demonstration
             x: d.x,
