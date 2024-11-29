@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Row, Col, Navbar, Container, Table, Form } from 'react-bootstrap';
+import { Button, Row, Col, Navbar, Container, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import DataTable from '../components/DataTable';
 
 const MainPage = () => {
     const navigate = useNavigate();
@@ -60,25 +61,10 @@ const MainPage = () => {
                             {error ? (
                                 <p className="text-danger mt-3">{error}</p>
                             ) : (
-                                <Table striped bordered hover className="mt-3">
-                                    <thead>
-                                        <tr>
-                                            {tableData.length > 0 &&
-                                                Object.keys(tableData[0]).map((col) => (
-                                                    <th key={col}>{col}</th>
-                                                ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {tableData.map((row, index) => (
-                                            <tr key={index}>
-                                                {Object.values(row).map((value, idx) => (
-                                                    <td key={idx}>{value}</td>
-                                                ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
+                                <DataTable
+                                    data={tableData}
+                                    columns={tableData.length > 0 ? Object.keys(tableData[0]) : []}
+                                />
                             )}
                         </Col>
                     </Row>

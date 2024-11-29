@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Row, Col, Navbar, Container, Table, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import DataTable from '../components/DataTable';
 
 const MainPage = () => {
     const navigate = useNavigate();
 
-    const [selectedTable, setSelectedTable] = useState('players2024');
+    const [selectedTable, setSelectedTable] = useState('pergame_2024');
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
 
@@ -33,10 +34,6 @@ const MainPage = () => {
                     <Row>
                         <Col md={6} className="p-4">
                             <h1>Graph Page</h1>
-                            <p className="text-primary">
-                                Find and filter through basketball statistics for the 2023-2024 NBA season!
-                            </p>
-                            <p className="text-secondary">More seasons to come</p>
                             <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
                             <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
                             <Form.Select
@@ -60,25 +57,10 @@ const MainPage = () => {
                             {error ? (
                                 <p className="text-danger mt-3">{error}</p>
                             ) : (
-                                <Table striped bordered hover className="mt-3">
-                                    <thead>
-                                        <tr>
-                                            {tableData.length > 0 &&
-                                                Object.keys(tableData[0]).map((col) => (
-                                                    <th key={col}>{col}</th>
-                                                ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {tableData.map((row, index) => (
-                                            <tr key={index}>
-                                                {Object.values(row).map((value, idx) => (
-                                                    <td key={idx}>{value}</td>
-                                                ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
+                                <DataTable
+                                    data={tableData}
+                                    columns={tableData.length > 0 ? Object.keys(tableData[0]) : []}
+                                />
                             )}
                         </Col>
                     </Row>
