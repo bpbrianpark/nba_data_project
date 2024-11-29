@@ -7,11 +7,25 @@ import { Row, Col, Navbar, Container } from 'react-bootstrap';
 const Landing = () => {
     const navigate = useNavigate();
 
+    // Create database
     const handleCreateDatabase = async () => {
         try {
             const response = await axios.post('http://127.0.0.1:5000/create_database');
             if (response.status === 200) {
                 alert("Database created successfully!");
+            }
+        } catch (error) {
+            console.error("Failed to create database:", error.response?.data || error.message);
+            alert("Error creating database: " + (error.response?.data?.message || error.message));
+        }
+    };
+
+    // Load database
+    const handleLoadDatabase = async() => {
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/scrape_database');
+            if (response.status === 200) {
+                alert("Database scraped successfully!");
                 navigate('/database');
             }
         } catch (error) {
@@ -40,6 +54,9 @@ const Landing = () => {
                     <Button variant='info' size='lg' onClick={handleCreateDatabase}>
                         Create Database
                         </Button>
+                    <Button variant='info' size='lg' onClick={handleLoadDatabase}>
+                        Scrape Database
+                    </Button>
                 </Col>
             </Row>
             </Col>

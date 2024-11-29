@@ -32,7 +32,7 @@ const MainPage = () => {
                 <Col md={10}>
                     <Row>
                         <Col md={6} className="p-4">
-                            <h1>Basketball Cerebro</h1>
+                            <h1>Graph Page</h1>
                             <p className="text-primary">
                                 Find and filter through basketball statistics for the 2023-2024 NBA season!
                             </p>
