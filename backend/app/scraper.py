@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from app.scrape.api_helpers import add_to_pergame, add_to_per36, add_to_per100, add_to_advanced, add_to_pbp, add_to_shooting, add_to_adj_shooting, create_db
+from app.api_helpers import add_to_pergame, add_to_per36, add_to_per100, add_to_advanced, add_to_pbp, add_to_shooting, add_to_adj_shooting, create_db
 
 def is_dupe(prev, curr):
     if (prev == curr):

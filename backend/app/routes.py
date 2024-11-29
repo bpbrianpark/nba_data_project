@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from app.scrape.api_helpers import create_db, connect_to_db
-from app.scrape.scraper import scrape_year_data
+from app.api_helpers import create_db, connect_to_db
+from app.scraper import scrape_year_data
 
 routes = Blueprint('routes', __name__)
 
@@ -33,6 +33,15 @@ def get_table_data(table_name):
         cur.close()
         con.close()
         return jsonify(data), 200
+    except Exception as e:
+        print(f"Error: {e}") 
+        return jsonify({"error": str(e)}), 500
+    
+@routes.route('/get_players/custom', methods=['GET'])
+def get_players_custom():
+    try:
+        con = None
+        return
     except Exception as e:
         print(f"Error: {e}") 
         return jsonify({"error": str(e)}), 500

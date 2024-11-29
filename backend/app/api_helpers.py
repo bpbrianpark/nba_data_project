@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-DB_NAME = "apitest5"
+DB_NAME = "testdb0"
 USER = "brianpark"
 PASSWORD = "123"
 PORT = "5532"
@@ -609,9 +609,4 @@ def add_to_adj_shooting(columns):
     )
     con.commit()
     cur.close()
-    con.close()
-    
-# don't forget to commit to make changes persistent 
-def close_db():
-    con.commit()
     con.close()
