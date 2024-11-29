@@ -5,32 +5,30 @@ export const Tooltip = ({ interactionData }) => {
     return null;
   }
 
-  const { xPos, yPos, name, color, x, y, size } = interactionData;
+  const { xPos, yPos, name, color, x, y, xAxisStat, yAxisStat } = interactionData;
 
   return (
     <div
       className={styles.tooltip}
       style={{
-        left: interactionData.xPos,
-        top: interactionData.yPos+200,
+        left: xPos,
+        top: yPos + 200,
       }}
     >
       <b className={styles.title}>{name}</b>
 
       <div className={styles.topHalfContainer} style={{ borderColor: color }}>
+
         <div className={styles.row}>
-          <b>Tyrese Haliburton</b>
+          <span>
+            {xAxisStat.label}: <b>{x}</b>
+          </span>
         </div>
-      </div>
-
-      <div className={styles.separator} />
-
-      <div className={styles.row}>
-        <span>
-          Assists Per Game:
-          <br />
-          10.9
-        </span>
+        <div className={styles.row}>
+          <span>
+            {yAxisStat.label}: <b>{y}</b>
+          </span>
+        </div>
       </div>
     </div>
   );
