@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button, Row, Col, Navbar, Container, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
+import LoadTableButton from '../components/buttons/LoadTableButton';
 
 const MainPage = () => {
     const navigate = useNavigate();
 
-    const [selectedTable, setSelectedTable] = useState('players2024');
+    const [selectedTable, setSelectedTable] = useState('pergame_2024');
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
 
@@ -54,9 +55,8 @@ const MainPage = () => {
                                 <option value="adj_shooting_2024">Adjusted Shooting</option>
                             </Form.Select>
 
-                            <Button variant="primary" onClick={fetchTableData}>
-                                Show Data
-                            </Button>
+                            <LoadTableButton
+                            onClick={fetchTableData}/>
 
                             {error ? (
                                 <p className="text-danger mt-3">{error}</p>

@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button, Row, Col, Navbar, Container, Table, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
+import BarGraph from '../components/graph/BarGraph';
+import { Scatterplot } from '../components/graph/Scatterplot';
+import LoadTableButton from '../components/buttons/LoadTableButton';
+import { data } from '../components/graph/data';
 
-const MainPage = () => {
+const GraphPage = () => {
     const navigate = useNavigate();
 
     const [selectedTable, setSelectedTable] = useState('pergame_2024');
@@ -50,9 +54,10 @@ const MainPage = () => {
                                 <option value="adj_shooting_2024">Adjusted Shooting</option>
                             </Form.Select>
 
-                            <Button variant="primary" onClick={fetchTableData}>
-                                Show Data
-                            </Button>
+                            <LoadTableButton
+                            onClick={fetchTableData}/>
+
+                            <div className="dataCard"><Scatterplot width={700} height={500} data={data} /></div>
 
                             {error ? (
                                 <p className="text-danger mt-3">{error}</p>
@@ -70,4 +75,4 @@ const MainPage = () => {
     );
 };
 
-export default MainPage;
+export default GraphPage;

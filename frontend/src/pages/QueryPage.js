@@ -3,9 +3,10 @@ import { Row, Col, Navbar, Container, Form } from 'react-bootstrap';
 import StatFilter from '../components/StatFilter';
 import DataTable from '../components/DataTable';
 import TableSelector from '../components/TableSelector';
+import LoadTableButton from '../components/buttons/LoadTableButton';
 
 const QueryPage = () => {
-    const [selectedTable, setSelectedTable] = useState('pergame_2024');
+    const [selectedTable, setSelectedTable] = useState(['pergame_2024']);
     const [tableData, setTableData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [error, setError] = useState(null);
@@ -105,6 +106,9 @@ const QueryPage = () => {
                                 onChange={(e) => setSelectedTable(e.target.value)}
                                 className="mb-3"
                             />
+
+                            <LoadTableButton
+                            onClick={fetchTableData}/>
 
                             <StatFilter
                                 filters={filters}
