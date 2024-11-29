@@ -31,10 +31,22 @@ def get_table_data(table_name):
         cur = con.cursor()
         cur.execute(f"SELECT * FROM {table_name}")
         rows = cur.fetchall()
-        columns = [desc[0] for desc in cur.description]
+        columns = [desc[0] for desc in cur.description]  # Column order from DB
+        # Construct rows as ordered dictionaries
         data = [dict(zip(columns, row)) for row in rows]
         cur.close()
         con.close()
+        return jsonify({"columns": columns, "data": data}), 200  # Return column order
+    except Exception as e:
+        print(f"Error: {e}") 
+        return jsonify({"error": str(e)}), 500
+
+    
+
+# Get Modified Column Name Endpoint 
+@routes.route('/get_column_name/<string:col_name>', methods=['GET'])
+def get_column_name(col_name):
+    try:
         return jsonify(data), 200
     except Exception as e:
         print(f"Error: {e}") 
