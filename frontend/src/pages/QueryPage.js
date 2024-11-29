@@ -19,6 +19,8 @@ const QueryPage = () => {
         try {
             const response = await fetch(`http://127.0.0.1:5000/get_table_data/${tableName}`);
             if (!response.ok) {
+                console.log("Could not fetch the data for this.");
+                console.log(`http://127.0.0.1:5000/get_table_data/${tableName}`);
                 throw new Error(`Error fetching data for ${tableName}`);
             }
             const data = await response.json();
@@ -101,14 +103,19 @@ const QueryPage = () => {
                             </p>
                             <p className="text-secondary">More seasons to come</p>
 
-                            <TableSelector
+                            <Form.Select
                                 value={selectedTable}
                                 onChange={(e) => setSelectedTable(e.target.value)}
                                 className="mb-3"
-                            />
-
-                            <LoadTableButton
-                            onClick={fetchTableData}/>
+                            >
+                                <option value="pergame_2024">Per Game</option>
+                                <option value="per36_2024">Per 36</option>
+                                <option value="per100_2024">Per 100 Possessions</option>
+                                <option value="advanced_2024">Advanced</option>
+                                <option value="pbp_2024">Play-by-Play</option>
+                                <option value="shooting_2024">Shooting</option>
+                                <option value="adj_shooting_2024">Adjusted Shooting</option>
+                            </Form.Select>
 
                             <StatFilter
                                 filters={filters}

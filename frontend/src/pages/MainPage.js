@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Row, Col, Navbar, Container, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
-import LoadTableButton from '../components/buttons/LoadTableButton';
 
 const MainPage = () => {
     const navigate = useNavigate();
@@ -27,6 +26,10 @@ const MainPage = () => {
             setTableData([]);
         }
     };
+
+    useEffect(() => {
+        fetchTableData(selectedTable);
+    }, [selectedTable]);
 
     return (
         <>
@@ -54,9 +57,6 @@ const MainPage = () => {
                                 <option value="shooting_2024">Shooting</option>
                                 <option value="adj_shooting_2024">Adjusted Shooting</option>
                             </Form.Select>
-
-                            <LoadTableButton
-                            onClick={fetchTableData}/>
 
                             {error ? (
                                 <p className="text-danger mt-3">{error}</p>
