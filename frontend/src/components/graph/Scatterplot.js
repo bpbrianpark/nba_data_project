@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AxisLeft } from './AxisLeft';
 import { AxisBottom } from './AxisBottom';
 import { Tooltip } from './Tooltip';
-import Legend from './Legend'; // Import the new Legend component
+import Legend from './Legend'; 
 import { Row } from 'react-bootstrap';
 
 const MARGIN = { top: 60, right: 60, bottom: 60, left: 60 };
@@ -16,6 +16,27 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
     const [hoveredGroup, setHoveredGroup] = useState(null);
     const [filteredData, setFilteredData] = useState(data); 
     const [activeGroups, setActiveGroups] = useState([]); 
+    const [showRegressionLine, setShowRegressionLine] = useState(false);
+
+    const calculateRegressionLine = (data) => {
+        const n = data.length;
+        const meanX = d3.mean(data, (d) => d.x);
+        const meanY = d3.mean(data, (d) => d.y);
+        const numerator = d3.sum(data, (d) => (d.x - meanX) * (d.y - meanY));
+        const denominator = d3.sum(data, (d) => Math.pow(d.x - meanX, 2));
+
+        const slope = numerator / denominator;
+        const intercept = meanY - slope * meanX;
+        return { slope, intercept };
+    };
+
+    const regressionLine = (data, slope, intercept) => {
+        const xValues = d3.extent(data, (d) => d.x);
+        return [
+            { x: xValues[0], y: slope * xValues[0] + intercept },
+            { x: xValues[1], y: slope * xValues[1] + intercept },
+        ];
+    };
 
     const xExtent = d3.extent(data, (d) => d.x);
     const yExtent = d3.extent(data, (d) => d.y);
@@ -89,8 +110,21 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
         }
     }, [activeGroups, data]); 
 
+    const { slope, intercept } = calculateRegressionLine(filteredData);
+    const linePoints = regressionLine(filteredData, slope, intercept);
+
     return (
         <div>
+        <div style={{ marginBottom: '10px' }}>
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={showRegressionLine}
+                        onChange={() => setShowRegressionLine(!showRegressionLine)}
+                    />
+                    Show Regression Line
+                </label>
+            </div>
         <Row></Row>
             <svg width={width} height={height}>
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
@@ -99,6 +133,16 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                         <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} />
                     </g>
                     {allShapes}
+                    {showRegressionLine && (
+                        <line
+                        x1={xScale(linePoints[0].x)}
+                        y1={yScale(linePoints[0].y)}
+                        x2={xScale(linePoints[1].x)}
+                        y2={yScale(linePoints[1].y)}
+                        stroke="black"
+                        strokeWidth="3"
+                    />
+                    )}
                 </g>
             </svg>
             <Legend 

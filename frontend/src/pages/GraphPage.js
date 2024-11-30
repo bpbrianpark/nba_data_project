@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 import { Scatterplot } from '../components/graph/Scatterplot';
 import LoadTableButton from '../components/buttons/LoadTableButton';
-import RSquaredButton from '../components/buttons/RSquaredButton';
 
 const GraphPage = () => {
     const navigate = useNavigate();
@@ -118,7 +117,6 @@ const GraphPage = () => {
                         </div>
 
                         {error && <p className="text-danger mt-3">{error}</p>}
-                        <RSquaredButton/>
                         <DataTable
                             selectedTable={selectedTable || []}
                             data={tableData.data || []}
