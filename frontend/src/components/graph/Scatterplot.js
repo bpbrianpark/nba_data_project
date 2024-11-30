@@ -4,7 +4,7 @@ import { AxisLeft } from './AxisLeft';
 import { AxisBottom } from './AxisBottom';
 import { Tooltip } from './Tooltip';
 import Legend from './Legend';
-import { Row } from 'react-bootstrap';
+import { Row, Form, Button, Col } from 'react-bootstrap';
 
 const MARGIN = { top: 60, right: 60, bottom: 60, left: 60 };
 const uniquePositions = ['PG', 'SG', 'SF', 'PF', 'C']; 
@@ -112,24 +112,46 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
     const { slope, intercept } = calculateRegressionLine(filteredData);
     const linePoints = regressionLine(filteredData, slope, intercept);
 
+    const [inputX, setInputX] = useState('');
+    const [predictedY, setPredictedY] = useState(null);
+
+    const handlePredictY = () => {
+        if (!isNaN(inputX) && inputX !== '') {
+            const y = slope * parseFloat(inputX) + intercept;
+            setPredictedY(y);
+        }
+    };
+
     return (
         <div>
             <div style={{ marginBottom: '10px' }}>
-                <label>
-                    <input
-                        type="checkbox"
-                        checked={showRegressionLine}
-                        onChange={() => setShowRegressionLine(!showRegressionLine)}
-                    />
-                    Show Regression Line
-                    {showRegressionLine && (
-                        <row>
-                            <h5>Slope = {slope}</h5>
-                            <h5>Intercept = {intercept}</h5>
-                        </row>
-                    )}
-                </label>
-            </div>
+    <label>
+        <input
+            type="checkbox"
+            checked={showRegressionLine}
+            onChange={() => setShowRegressionLine(!showRegressionLine)}
+        />
+        Show Regression Line
+    </label>
+    <div style={{ marginTop: '10px' }}>
+        <label>
+            Predict Y for X: 
+            <input
+                type="number"
+                value={inputX}
+                onChange={(e) => setInputX(e.target.value)}
+                style={{ marginLeft: '5px', marginRight: '10px' }}
+            />
+        </label>
+        <button onClick={handlePredictY}>Predict</button>
+        {predictedY !== null && (
+            <span style={{ marginLeft: '10px' }}>
+                Predicted Y: {predictedY.toFixed(2)}
+            </span>
+        )}
+    </div>
+</div>
+
             <Row></Row>
             <svg width={width} height={height}>
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
