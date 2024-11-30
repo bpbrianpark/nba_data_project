@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from app.api_helpers import create_db, connect_to_db
-from app.scraper import scrape_year_data
+from app.scraper import scrape_year_data, scrape_all_years
 
 routes = Blueprint('routes', __name__)
 
@@ -17,7 +17,7 @@ def create_database():
 @routes.route('/scrape_database', methods=['POST'])
 def scrape_database():
     try:
-        scrape_year_data()
+        scrape_all_years(2024)
         return jsonify({"message": "Database scraped successfully!"}), 200
     except Exception as e:
         return jsonify({"error": "Failed to scrape database", "message": str(e)}), 500
