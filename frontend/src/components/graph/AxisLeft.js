@@ -17,11 +17,10 @@ export const AxisLeft = ({ yScale, pixelsPerTick, width }) => {
 
   return (
     <>
-      {/* Ticks and labels */}
       {ticks.map(({ value, yOffset }) => (
         <g
           key={value}
-          transform={`translate(0, ${yOffset})`} // Fixed template literal
+          transform={`translate(0, ${yOffset})`}
           shapeRendering="crispEdges"
         >
           <line

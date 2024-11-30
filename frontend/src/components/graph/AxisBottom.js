@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 
-// tick length
 const TICK_LENGTH = 6;
 
 export const AxisBottom = ({ xScale, pixelsPerTick }) => {
@@ -18,14 +17,12 @@ export const AxisBottom = ({ xScale, pixelsPerTick }) => {
 
   return (
     <>
-      {/* Main horizontal line */}
       <path
         d={`M ${range[0]} 0 L ${range[1]} 0`}
         fill="none"
         stroke="currentColor"
       />
 
-      {/* Ticks and labels */}
       {ticks.map(({ value, xOffset }) => (
         <g key={value} transform={`translate(${xOffset}, 0)`}>
           <line y2={TICK_LENGTH} stroke="currentColor" />
