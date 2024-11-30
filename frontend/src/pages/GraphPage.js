@@ -120,6 +120,7 @@ const GraphPage = () => {
                         {error && <p className="text-danger mt-3">{error}</p>}
                         <RSquaredButton/>
                         <DataTable
+                            selectedTable={selectedTable || []}
                             data={tableData.data || []}
                             columns={tableData.columns || []}
                         />

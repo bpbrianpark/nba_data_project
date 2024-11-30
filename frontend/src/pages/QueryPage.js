@@ -20,8 +20,6 @@ const QueryPage = () => {
         try {
             const response = await fetch(`http://127.0.0.1:5000/get_table_data/${selectedTable}`);
             if (!response.ok) {
-                console.log("Could not fetch the data for this.");
-                console.log('http://127.0.0.1:5000/get_table_data/${selectedTable}');
                 throw new Error(`Error fetching data for ${selectedTable}`);
             }
             const { columns, data } = await response.json();
@@ -63,35 +61,52 @@ const QueryPage = () => {
     };
 
     const applyFilters = () => {
-        let filtered = tableData.data;
-
+        let filtered = [...tableData.data]; // Copy original data
+        console.log("Original Data:", filtered);
+    
+        // Apply each filter
         filters.forEach(({ field, operator, value }) => {
             if (field && value) {
+                console.log(`Applying filter - Field: ${field}, Operator: ${operator}, Value: ${value}`);
                 filtered = filtered.filter((row) => {
-                    const rowValue = parseFloat(row[field]);
-                    const filterValue = parseFloat(value);
-                    if (isNaN(rowValue) || isNaN(filterValue)) {
-                        return false; 
+                    const rowValue = row[field];
+                    const filterValue = isNaN(value) ? value.toString() : parseFloat(value);
+    
+                    if (typeof rowValue === "undefined") {
+                        console.warn(`Field "${field}" missing in row:`, row);
+                        return false;
                     }
+    
+                    const numericRowValue = isNaN(rowValue) ? rowValue.toString() : parseFloat(rowValue);
                     switch (operator) {
-                        case '>':
-                            return rowValue > filterValue;
-                        case '<':
-                            return rowValue < filterValue;
-                        case '=':
-                            return rowValue === filterValue;
+                        case ">":
+                            return numericRowValue > filterValue;
+                        case "<":
+                            return numericRowValue < filterValue;
+                        case "=":
+                            return numericRowValue === filterValue;
                         default:
-                            return true;
+                            console.warn(`Unsupported operator "${operator}"`);
+                            return false;
                     }
                 });
             }
         });
-
+    
+        console.log("Data after applying stat filters:", filtered);
+    
+        // Apply position filter if any positions are selected
         if (selectedPositions.length > 0) {
+            console.log("Applying position filter with selected positions:", selectedPositions);
             filtered = filtered.filter((row) => selectedPositions.includes(row.pos));
         }
+    
+        console.log("Filtered Data:", filtered);
+    
         setFilteredData({ columns: tableData.columns, data: filtered });
     };
+    
+    
 
     return (
         <>
@@ -109,9 +124,9 @@ const QueryPage = () => {
                                 Find and filter through basketball statistics for the 2023-2024 NBA season!
                             </p>
                             <p className="text-secondary">More seasons to come</p>
-                            <Button variant='info' size='lg' onClick={() => navigate('/database')}>Main Page</Button>
-                            <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
-                            <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
+                            <Button variant="info" size="lg" onClick={() => navigate('/database')}>Main Page</Button>
+                            <Button variant="info" size="lg" onClick={() => navigate('/query')}>Query</Button>
+                            <Button variant="info" size="lg" onClick={() => navigate('/graph')}>Graph</Button>
                             <Form.Select
                                 value={selectedTable}
                                 onChange={(e) => setSelectedTable(e.target.value)}
@@ -135,13 +150,15 @@ const QueryPage = () => {
                                 onPositionChange={handlePositionChange}
                                 onApplyFilters={applyFilters}
                             />
-
+                            
                             {error ? (
                                 <p className="text-danger">{error}</p>
                             ) : (
                                 <DataTable
-                                    data={filteredData.data || []}
-                                    columns={filteredData.columns || []}
+                                    key={JSON.stringify(filteredData.data)}
+                                    selectedTable={selectedTable}
+                                    data={filteredData.data}
+                                    columns={filteredData.columns}
                                 />
                             )}
                         </Col>
