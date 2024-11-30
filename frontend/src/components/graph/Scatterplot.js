@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { AxisLeft } from './AxisLeft';
 import { AxisBottom } from './AxisBottom';
 import { Tooltip } from './Tooltip';
-import Legend from './Legend'; 
+import Legend from './Legend';
 import { Row } from 'react-bootstrap';
 
 const MARGIN = { top: 60, right: 60, bottom: 60, left: 60 };
+const uniquePositions = ['PG', 'SG', 'SF', 'PF', 'C']; 
+const colorScale = d3.scaleOrdinal().domain(uniquePositions).range(d3.schemeCategory10);
 
 export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => {
     const boundsWidth = width - MARGIN.right - MARGIN.left;
@@ -14,8 +16,8 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
 
     const [hovered, setHovered] = useState(null);
     const [hoveredGroup, setHoveredGroup] = useState(null);
-    const [filteredData, setFilteredData] = useState(data); 
-    const [activeGroups, setActiveGroups] = useState([]); 
+    const [filteredData, setFilteredData] = useState(data);
+    const [activeGroups, setActiveGroups] = useState([]);
     const [showRegressionLine, setShowRegressionLine] = useState(false);
 
     const calculateRegressionLine = (data) => {
@@ -53,12 +55,9 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
         .domain([yExtent[0] - yPadding, yExtent[1] + yPadding])
         .range([boundsHeight, 0]);
 
-    const uniquePositions = Array.from(new Set(data.map((d) => d.group)));
-    const colorScale = d3.scaleOrdinal().domain(uniquePositions).range(d3.schemeCategory10);
-
     const allShapes = filteredData.map((d, i) => {
-        const isHoveredGroup = hoveredGroup === d.group; 
-        const isOtherGroup = hoveredGroup && hoveredGroup !== d.group; 
+        const isHoveredGroup = hoveredGroup === d.group;
+        const isOtherGroup = hoveredGroup && hoveredGroup !== d.group;
 
         return (
             <circle
@@ -67,9 +66,9 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                 cx={xScale(d.x)}
                 cy={yScale(d.y)}
                 stroke={isHoveredGroup ? colorScale(d.group) : 'transparent'}
-                fill={isHoveredGroup ? colorScale(d.group) : isOtherGroup ? 'grey' : colorScale(d.group)}  
-                fillOpacity={isHoveredGroup ? 0.7 : isOtherGroup ? 0.3 : 0.7}  
-                style={{ transition: 'all 0.3s ease' }}  
+                fill={isHoveredGroup ? colorScale(d.group) : isOtherGroup ? 'grey' : colorScale(d.group)}
+                fillOpacity={isHoveredGroup ? 0.7 : isOtherGroup ? 0.3 : 0.7}
+                style={{ transition: 'all 0.3s ease' }}
                 onMouseEnter={() => {
                     setHovered({
                         xPos: xScale(d.x),
@@ -81,11 +80,11 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                         xAxisStat: { label: xAxisLabel, value: d.x },
                         yAxisStat: { label: yAxisLabel, value: d.y },
                     });
-                    setHoveredGroup(d.group);  
+                    setHoveredGroup(d.group);
                 }}
                 onMouseLeave={() => {
                     setHovered(null);
-                    setHoveredGroup(null);  
+                    setHoveredGroup(null);
                 }}
             />
         );
@@ -108,14 +107,14 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
             const filtered = data.filter((d) => activeGroups.includes(d.group));
             setFilteredData(filtered);
         }
-    }, [activeGroups, data]); 
+    }, [activeGroups, data]);
 
     const { slope, intercept } = calculateRegressionLine(filteredData);
     const linePoints = regressionLine(filteredData, slope, intercept);
 
     return (
         <div>
-        <div style={{ marginBottom: '10px' }}>
+            <div style={{ marginBottom: '10px' }}>
                 <label>
                     <input
                         type="checkbox"
@@ -125,17 +124,13 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                     Show Regression Line
                     {showRegressionLine && (
                         <row>
-                        <h5>
-                            Slope = {slope}
-                        </h5>
-                        <h5>
-                            Intercept = {intercept}
-                        </h5>
+                            <h5>Slope = {slope}</h5>
+                            <h5>Intercept = {intercept}</h5>
                         </row>
                     )}
                 </label>
             </div>
-        <Row></Row>
+            <Row></Row>
             <svg width={width} height={height}>
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
                     <AxisLeft yScale={yScale} pixelsPerTick={40} width={boundsWidth} />
@@ -145,28 +140,27 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                     {allShapes}
                     {showRegressionLine && (
                         <line
-                        x1={xScale(linePoints[0].x)}
-                        y1={yScale(linePoints[0].y)}
-                        x2={xScale(linePoints[1].x)}
-                        y2={yScale(linePoints[1].y)}
-                        stroke="black"
-                        strokeWidth="3"
-                    />
+                            x1={xScale(linePoints[0].x)}
+                            y1={yScale(linePoints[0].y)}
+                            x2={xScale(linePoints[1].x)}
+                            y2={yScale(linePoints[1].y)}
+                            stroke="black"
+                            strokeWidth="3"
+                        />
                     )}
                 </g>
             </svg>
-            <Legend 
-                positions={['PG', 'SG', 'SF', 'PF', 'C']} 
-                colorScale={colorScale} 
-                hoveredGroup={hoveredGroup} 
-                setHoveredGroup={setHoveredGroup} 
-                toggleFilter={toggleFilter} 
-                activeGroups={activeGroups} 
-                title={"Positions"}
+            <Legend
+                positions={uniquePositions}
+                colorScale={colorScale}
+                hoveredGroup={hoveredGroup}
+                setHoveredGroup={setHoveredGroup}
+                toggleFilter={toggleFilter}
+                activeGroups={activeGroups}
+                title={'Positions'}
             />
-
             <Tooltip interactionData={hovered} />
-            <Row/>
+            <Row />
         </div>
     );
 };
