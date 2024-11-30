@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 import { Scatterplot } from '../components/graph/Scatterplot';
 import LoadTableButton from '../components/buttons/LoadTableButton';
+import RSquaredButton from '../components/buttons/RSquaredButton';
 
 const GraphPage = () => {
     const navigate = useNavigate();
@@ -21,10 +22,12 @@ const GraphPage = () => {
             if (!response.ok) {
                 throw new Error(`Could not fetch data from ${selectedTable}`);
             }
-            const data = await response.json();
-            setTableData(data);
+            const { columns, data } = await response.json();
+            if (!Array.isArray(data)) {
+                throw new Error("Expected 'data' to be an array");
+            }
+            setTableData({ columns, data});
             setError(null);
-
             const columnNames = data.length > 0 ? Object.keys(data[0]) : [];
             setColumns(columnNames);
             if (columnNames.length >= 2) {
@@ -100,7 +103,7 @@ const GraphPage = () => {
                                 <Scatterplot
                                     width={700}
                                     height={500}
-                                    data={tableData
+                                    data={tableData.data
                                         .filter((row) => row[xColumn] && row[yColumn])
                                         .map((row) => ({
                                             x: parseFloat(row[xColumn]),
@@ -115,10 +118,10 @@ const GraphPage = () => {
                         </div>
 
                         {error && <p className="text-danger mt-3">{error}</p>}
-
+                        <RSquaredButton/>
                         <DataTable
-                            data={tableData}
-                            columns={columns}
+                            data={tableData.data || []}
+                            columns={tableData.columns || []}
                         />
                     </Col>
                 </Row>

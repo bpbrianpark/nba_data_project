@@ -3,41 +3,45 @@ import { Button, Row, Col, Navbar, Container, Form } from 'react-bootstrap';
 import StatFilter from '../components/StatFilter';
 import DataTable from '../components/DataTable';
 import { useNavigate } from 'react-router-dom';
-import TableSelector from '../components/TableSelector';
-import LoadTableButton from '../components/buttons/LoadTableButton';
 
 const QueryPage = () => {
     const navigate = useNavigate();
-    const [selectedTable, setSelectedTable] = useState(['pergame_2024']);
-    const [tableData, setTableData] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
+
+    const [selectedTable, setSelectedTable] = useState('pergame_2024');
+    const [tableData, setTableData] = useState({ columns: [], data: [] });
+    const [filteredData, setFilteredData] = useState({ columns: [], data: [] });
     const [error, setError] = useState(null);
     const [filters, setFilters] = useState([]);
     const [selectedPositions, setSelectedPositions] = useState([]);
 
     const allPositions = ['PG', 'SG', 'SF', 'PF', 'C'];
 
-    const fetchTableData = async (tableName) => {
+    const fetchTableData = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/get_table_data/${tableName}`);
+            const response = await fetch(`http://127.0.0.1:5000/get_table_data/${selectedTable}`);
             if (!response.ok) {
                 console.log("Could not fetch the data for this.");
-                console.log(`http://127.0.0.1:5000/get_table_data/${tableName}`);
-                throw new Error(`Error fetching data for ${tableName}`);
+                console.log('http://127.0.0.1:5000/get_table_data/${selectedTable}');
+                throw new Error(`Error fetching data for ${selectedTable}`);
             }
-            const data = await response.json();
-            setTableData(data);
-            setFilteredData(data);
+            const { columns, data } = await response.json();
+            if (!Array.isArray(data)) {
+                throw new Error("Expected 'data' to be an array");
+            }
+            const table = { columns, data };
+            setTableData(table);
+            setFilteredData(table); 
             setError(null);
         } catch (err) {
             console.error(err);
             setError(err.message);
-            setTableData([]);
+            setTableData({ columns: [], data: [] });
+            setFilteredData({ columns: [], data: [] });
         }
     };
 
     useEffect(() => {
-        fetchTableData(selectedTable);
+        fetchTableData();
     }, [selectedTable]);
 
     const addFilter = () => {
@@ -59,14 +63,16 @@ const QueryPage = () => {
     };
 
     const applyFilters = () => {
-        let filtered = tableData;
+        let filtered = tableData.data;
 
         filters.forEach(({ field, operator, value }) => {
             if (field && value) {
                 filtered = filtered.filter((row) => {
                     const rowValue = parseFloat(row[field]);
                     const filterValue = parseFloat(value);
-
+                    if (isNaN(rowValue) || isNaN(filterValue)) {
+                        return false; 
+                    }
                     switch (operator) {
                         case '>':
                             return rowValue > filterValue;
@@ -84,8 +90,7 @@ const QueryPage = () => {
         if (selectedPositions.length > 0) {
             filtered = filtered.filter((row) => selectedPositions.includes(row.pos));
         }
-
-        setFilteredData(filtered);
+        setFilteredData({ columns: tableData.columns, data: filtered });
     };
 
     return (
@@ -135,8 +140,8 @@ const QueryPage = () => {
                                 <p className="text-danger">{error}</p>
                             ) : (
                                 <DataTable
-                                    data={filteredData}
-                                    columns={filteredData.length > 0 ? Object.keys(filteredData[0]) : []}
+                                    data={filteredData.data || []}
+                                    columns={filteredData.columns || []}
                                 />
                             )}
                         </Col>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Row, Col, Navbar, Container, Form } from 'react-bootstrap';
+import { Button, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 
@@ -17,13 +17,16 @@ const MainPage = () => {
             if (!response.ok) {
                 throw new Error(`Could not fetch data from ${selectedTable}`);
             }
-            const data = await response.json();
-            setTableData(data);
+            const { columns, data } = await response.json();
+            if (!Array.isArray(data)) {
+                throw new Error("Expected 'data' to be an array");
+            }
+            setTableData({ columns, data });
             setError(null);
         } catch (err) {
             console.error(err);
             setError(err.message);
-            setTableData([]);
+            setTableData({ columns: [], data: [] }); // Reset to empty in case of error
         }
     };
 
@@ -63,8 +66,8 @@ const MainPage = () => {
                                 <p className="text-danger mt-3">{error}</p>
                             ) : (
                                 <DataTable
-                                    data={tableData}
-                                    columns={tableData.length > 0 ? Object.keys(tableData[0]) : []}
+                                    data={tableData.data || []}
+                                    columns={tableData.columns || []} 
                                 />
                             )}
                         </Col>
