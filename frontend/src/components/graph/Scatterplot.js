@@ -123,6 +123,16 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                         onChange={() => setShowRegressionLine(!showRegressionLine)}
                     />
                     Show Regression Line
+                    {showRegressionLine && (
+                        <row>
+                        <h5>
+                            Slope = {slope}
+                        </h5>
+                        <h5>
+                            Intercept = {intercept}
+                        </h5>
+                        </row>
+                    )}
                 </label>
             </div>
         <Row></Row>
