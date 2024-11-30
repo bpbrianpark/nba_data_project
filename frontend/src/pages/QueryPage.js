@@ -140,6 +140,7 @@ const QueryPage = () => {
                                 <p className="text-danger">{error}</p>
                             ) : (
                                 <DataTable
+                                    selectedTable={selectedTable || []}
                                     data={filteredData.data || []}
                                     columns={filteredData.columns || []}
                                 />

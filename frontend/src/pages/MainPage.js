@@ -62,14 +62,12 @@ const MainPage = () => {
                                 <option value="adj_shooting_2024">Adjusted Shooting</option>
                             </Form.Select>
 
-                            {error ? (
-                                <p className="text-danger mt-3">{error}</p>
-                            ) : (
-                                <DataTable
-                                    data={tableData.data || []}
-                                    columns={tableData.columns || []} 
-                                />
-                            )}
+                            {error && <p className="text-danger mt-3">{error}</p>}
+                        <DataTable
+                            selectedTable={selectedTable || []}
+                            data={tableData.data || []}
+                            columns={tableData.columns || []}
+                        />
                         </Col>
                     </Row>
                 </Col>
