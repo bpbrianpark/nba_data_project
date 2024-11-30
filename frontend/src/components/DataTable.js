@@ -1,36 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Table } from 'react-bootstrap';
 
 const DataTable = ({ selectedTable, data, columns }) => {
-    const [tableData, setTableData] = useState({ columns: [], data: [] });
     const [sortConfig, setSortConfig] = useState({ column: null, direction: 'asc' });
-    const [error, setError] = useState(null);
-
-    const fetchTableData = async () => {
-        try {
-            const response = await fetch(`http://127.0.0.1:5000/get_table_data/${selectedTable}`);
-            if (!response.ok) {
-                throw new Error(`Could not fetch data from ${selectedTable}`);
-            }
-            const { columns, data } = await response.json();
-
-            if (!Array.isArray(data)) {
-                throw new Error("Expected 'data' to be an array");
-            }
-            setTableData({ columns, data });
-            setError(null);
-        } catch (err) {
-            console.error(err);
-            setError(err.message);
-            setTableData({ columns: [], data: [] });
-        }
-    };
-
-    useEffect(() => {
-        if (selectedTable) {
-            fetchTableData();
-        }
-    }, [selectedTable]);
 
     const handleColumnClick = (column) => {
         if (sortConfig.column === column) {
@@ -46,10 +18,11 @@ const DataTable = ({ selectedTable, data, columns }) => {
         }
     };
 
-    const sortedData = React.useMemo(() => {
-        if (!sortConfig.column || sortConfig.direction === 'none') return tableData.data;
+    // Apply sorting based on the selected column and direction
+    const sortedData = useMemo(() => {
+        if (!sortConfig.column || sortConfig.direction === 'none') return data;
 
-        const sorted = [...tableData.data].sort((a, b) => {
+        const sorted = [...data].sort((a, b) => {
             const aValue = isNaN(a[sortConfig.column])
                 ? a[sortConfig.column]
                 : parseFloat(a[sortConfig.column]);
@@ -67,7 +40,7 @@ const DataTable = ({ selectedTable, data, columns }) => {
         });
 
         return sorted;
-    }, [tableData.data, sortConfig]);
+    }, [data, sortConfig]);
 
     return (
         <Table striped bordered hover>
