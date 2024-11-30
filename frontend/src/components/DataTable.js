@@ -18,7 +18,6 @@ const DataTable = ({ selectedTable, data, columns }) => {
         }
     };
 
-    // Apply sorting based on the selected column and direction
     const sortedData = useMemo(() => {
         if (!sortConfig.column || sortConfig.direction === 'none') return data;
 

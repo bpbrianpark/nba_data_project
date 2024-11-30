@@ -7,7 +7,6 @@ import LoadTableButton from '../components/buttons/LoadTableButton';
 
 const GraphPage = () => {
     const navigate = useNavigate();
-
     const [selectedTable, setSelectedTable] = useState('pergame_2024');
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);

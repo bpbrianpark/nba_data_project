@@ -80,5 +80,5 @@ def scrape_year_data():
 # TODO:
 # Webscrape all the player data for every year
 def scrape_all_years():
-    # Increment from 2003 to 2024
+    # Increment from 2014 to 2024
     return

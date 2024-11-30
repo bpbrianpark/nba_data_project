@@ -61,19 +61,14 @@ const QueryPage = () => {
     };
 
     const applyFilters = () => {
-        let filtered = [...tableData.data]; // Copy original data
-        console.log("Original Data:", filtered);
-    
-        // Apply each filter
+        let filtered = [...tableData.data]; 
         filters.forEach(({ field, operator, value }) => {
             if (field && value) {
-                console.log(`Applying filter - Field: ${field}, Operator: ${operator}, Value: ${value}`);
                 filtered = filtered.filter((row) => {
                     const rowValue = row[field];
                     const filterValue = isNaN(value) ? value.toString() : parseFloat(value);
     
                     if (typeof rowValue === "undefined") {
-                        console.warn(`Field "${field}" missing in row:`, row);
                         return false;
                     }
     
@@ -86,27 +81,17 @@ const QueryPage = () => {
                         case "=":
                             return numericRowValue === filterValue;
                         default:
-                            console.warn(`Unsupported operator "${operator}"`);
                             return false;
                     }
                 });
             }
         });
     
-        console.log("Data after applying stat filters:", filtered);
-    
-        // Apply position filter if any positions are selected
         if (selectedPositions.length > 0) {
-            console.log("Applying position filter with selected positions:", selectedPositions);
             filtered = filtered.filter((row) => selectedPositions.includes(row.pos));
-        }
-    
-        console.log("Filtered Data:", filtered);
-    
+        } 
         setFilteredData({ columns: tableData.columns, data: filtered });
     };
-    
-    
 
     return (
         <>
@@ -155,7 +140,6 @@ const QueryPage = () => {
                                 <p className="text-danger">{error}</p>
                             ) : (
                                 <DataTable
-                                    key={JSON.stringify(filteredData.data)}
                                     selectedTable={selectedTable}
                                     data={filteredData.data}
                                     columns={filteredData.columns}
