@@ -125,33 +125,29 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
     return (
         <div>
             <div style={{ marginBottom: '10px' }}>
-    <label>
-        <input
-            type="checkbox"
-            checked={showRegressionLine}
-            onChange={() => setShowRegressionLine(!showRegressionLine)}
-        />
-        Show Regression Line
-    </label>
-    <div style={{ marginTop: '10px' }}>
-        <label>
-            Predict Y for X: 
-            <input
-                type="number"
-                value={inputX}
-                onChange={(e) => setInputX(e.target.value)}
-                style={{ marginLeft: '5px', marginRight: '10px' }}
-            />
-        </label>
-        <button onClick={handlePredictY}>Predict</button>
-        {predictedY !== null && (
-            <span style={{ marginLeft: '10px' }}>
-                Predicted Y: {predictedY.toFixed(2)}
-            </span>
-        )}
-    </div>
-</div>
-
+                <label>
+                    <input type="checkbox" checked={showRegressionLine} onChange={() => setShowRegressionLine(!showRegressionLine)}/>
+                        Show Regression Line
+                    {showRegressionLine && (
+                        <row>
+                            <h5>Slope = {slope}</h5>
+                            <h5>Intercept = {intercept}</h5>
+                        </row>
+                    )}
+                </label>
+                <div style={{ marginTop: '10px' }}>
+                    <label>
+                        Predict Y for X: 
+                        <input type="number" value={inputX} onChange={(e) => setInputX(e.target.value)} style={{ marginLeft: '5px', marginRight: '10px' }}/>
+                    </label>
+                    <button onClick={handlePredictY}>Predict</button>
+                    {predictedY !== null && (
+                        <span style={{ marginLeft: '10px' }}>
+                            Predicted Y: {predictedY.toFixed(2)}
+                        </span>
+                    )}
+                </div>
+            </div>
             <Row></Row>
             <svg width={width} height={height}>
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
@@ -170,6 +166,12 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                             strokeWidth="3"
                         />
                     )}
+                    <text x={boundsWidth / 2} y={boundsHeight + 40} textAnchor="middle" fontSize="14">
+                        {xAxisLabel}
+                    </text>
+                    <text x={-boundsHeight / 2} y={-40} textAnchor="middle" transform="rotate(-90)" fontSize="14">
+                        {yAxisLabel}
+                    </text>
                 </g>
             </svg>
             <Legend
