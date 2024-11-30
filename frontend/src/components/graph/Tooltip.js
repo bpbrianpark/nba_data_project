@@ -12,7 +12,7 @@ export const Tooltip = ({ interactionData }) => {
       className={styles.tooltip}
       style={{
         left: xPos,
-        top: yPos + 200,
+        top: yPos+450,
       }}
     >
       <b className={styles.title}>{name}</b>

@@ -148,6 +148,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                     )}
                 </div>
             </div>
+
             <Row></Row>
             <svg width={width} height={height}>
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
