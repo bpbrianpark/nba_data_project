@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 import { Scatterplot } from '../components/graph/Scatterplot';
 import LoadTableButton from '../components/buttons/LoadTableButton';
+import StatFilter from '../components/StatFilter';
 
 const GraphPage = () => {
     const navigate = useNavigate();
@@ -14,6 +15,11 @@ const GraphPage = () => {
     const [xColumn, setXColumn] = useState('');
     const [yColumn, setYColumn] = useState('');
     const [columns, setColumns] = useState([]); 
+    const [filteredData, setFilteredData] = useState({columns: [], data: []})
+    const [selectedPositions, setSelectedPositions] = useState([]);
+    const [filters, setFilters] = useState([]);
+
+    const allPositions = ['PG', 'SG', 'SF', 'PF', 'C'];
 
     const fetchTableData = async () => {
         try {
@@ -26,6 +32,7 @@ const GraphPage = () => {
                 throw new Error("Expected 'data' to be an array");
             }
             setTableData({ columns, data});
+            setFilteredData({ columns, data});
             setError(null);
             const columnNames = data.length > 0 ? Object.keys(data[0]) : [];
             setColumns(columnNames);
@@ -38,12 +45,64 @@ const GraphPage = () => {
             setError(err.message);
             setTableData([]);
             setColumns([]);
+            setFilteredData({ columns: [], data: [] });
         }
     };
 
     useEffect(() => {
         fetchTableData(); 
     }, [selectedTable]);
+
+    const addFilter = () => {
+        setFilters([...filters, { field: '', operator: '>', value: '' }]);
+    };
+
+    const updateFilter = (index, key, value) => {
+        const newFilters = [...filters];
+        newFilters[index][key] = value;
+        setFilters(newFilters);
+    };
+
+    const handlePositionChange = (position) => {
+        setSelectedPositions((prevPositions) =>
+            prevPositions.includes(position)
+                ? prevPositions.filter((pos) => pos !== position)
+                : [...prevPositions, position]
+        );
+    };
+
+    const applyFilters = () => {
+        let filtered = [...tableData.data]; 
+        filters.forEach(({ field, operator, value }) => {
+            if (field && value) {
+                filtered = filtered.filter((row) => {
+                    const rowValue = row[field];
+                    const filterValue = isNaN(value) ? value.toString() : parseFloat(value);
+    
+                    if (typeof rowValue === "undefined") {
+                        return false;
+                    }
+    
+                    const numericRowValue = isNaN(rowValue) ? rowValue.toString() : parseFloat(rowValue);
+                    switch (operator) {
+                        case ">":
+                            return numericRowValue > filterValue;
+                        case "<":
+                            return numericRowValue < filterValue;
+                        case "=":
+                            return numericRowValue === filterValue;
+                        default:
+                            return false;
+                    }
+                });
+            }
+        });
+    
+        if (selectedPositions.length > 0) {
+            filtered = filtered.filter((row) => selectedPositions.includes(row.pos));
+        } 
+        setFilteredData({ columns: tableData.columns, data: filtered });
+    };
 
     return (
         <div className="landing-container">
@@ -96,13 +155,22 @@ const GraphPage = () => {
                         </Form.Select>
 
                         <LoadTableButton onClick={fetchTableData} />
+                        <StatFilter
+                                filters={filters}
+                                onAddFilter={addFilter}
+                                onUpdateFilter={updateFilter}
+                                positions={allPositions}
+                                selectedPositions={selectedPositions}
+                                onPositionChange={handlePositionChange}
+                                onApplyFilters={applyFilters}
+                            />
 
                         <div className="dataCard">
                             {xColumn && yColumn && (
                                 <Scatterplot
                                     width={700}
                                     height={500}
-                                    data={tableData.data
+                                    data={filteredData.data
                                         .filter((row) => row[xColumn] && row[yColumn])
                                         .map((row) => ({
                                             x: parseFloat(row[xColumn]),
@@ -119,7 +187,7 @@ const GraphPage = () => {
                         {error && <p className="text-danger mt-3">{error}</p>}
                         <DataTable
                             selectedTable={selectedTable || []}
-                            data={tableData.data || []}
+                            data={filteredData.data || []}
                             columns={tableData.columns || []}
                         />
                     </Col>
