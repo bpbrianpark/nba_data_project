@@ -102,6 +102,26 @@ def get_all_columns(table_name):
     except Exception as e:
         print(f"Error: {e}") 
         return jsonify({"error": str(e)}), 500
+    
+# Get Tables Endpoint 
+# select year, {col} FROM {table}_{year} (although maybe u can just do the table) WHERE pid=pid that you want
+# return the 3 and make it into a table
+@routes.route('/get_single_player_table_data/<int:pid>/', methods=['GET'])
+def get_single_player_table_data(table_name):
+    try:
+        con = None
+        con = connect_to_db(con)
+        cur = con.cursor()
+        cur.execute(f"SELECT * FROM {table_name}")
+        rows = cur.fetchall()
+        columns = [desc[0] for desc in cur.description]  
+        data = [dict(zip(columns, row)) for row in rows]
+        cur.close()
+        con.close()
+        return jsonify({"columns": columns, "data": data}), 200 
+    except Exception as e:
+        print(f"Error: {e}") 
+        return jsonify({"error": str(e)}), 500
 
     
 # TODO: fix the col_directory

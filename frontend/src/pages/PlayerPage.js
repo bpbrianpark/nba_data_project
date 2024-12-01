@@ -49,7 +49,6 @@ const PlayerPage = () => {
             { value: 'adj_shooting_2022', label: 'Adjusted Shooting' },
         ]
     };
-
     useEffect(() => {
         fetchPlayers(selectedYear);
     }, [selectedYear]);
@@ -59,85 +58,26 @@ const PlayerPage = () => {
             const response = await fetch(`http://127.0.0.1:5000/get_players/${year}`);
             if (!response.ok) throw new Error('Failed to fetch players');
             const { players } = await response.json();
-            if (Array.isArray(players)) {
-                const playerOptions = players.map((player) => ({
-                    value: player.pid,  
-                    label: player.name,
-                }));
-                setPlayers(playerOptions);
-            } else {
-                throw new Error('Expected an array of players');
-            }
-        } catch (err) {
-            console.error(err);
-            setError(err.message);
-        }
-    };
-    
-    const fetchPlayerData = async (playerId, table) => {
-        try {
-            console.log("Fetching player data.");
-            const tablePrefix = table.slice(0, -5);
-            const response = await fetch(`http://127.0.0.1:5000/get_yearly_stats/${playerId}/${tablePrefix}/pts`);
-            if (!response.ok) throw new Error(`Could not fetch data for player: ${playerId}`);
-            const { pid, stats } = await response.json();
-            if (!Array.isArray(stats)) throw new Error("Expected 'stats' to be an array");
-            const columns = ["year", "column", "value"];
-            const data = stats.map((stat) => ({
-                year: stat.year,
-                column: stat.column,
-                value: stat.value,
+            const playerOptions = players.map((player) => ({
+                value: player.pid,  
+                label: player.name,
             }));
-            setColumns(columns); 
-            setFilteredData({ columns, data });
-            setError(null);
-            console.log("Columns: ", columns);
-            if (columns.length >= 2) {
-                setYColumn(columns[2]);
-            }
+            setPlayers(playerOptions);
         } catch (err) {
-            console.error(err);
             setError(err.message);
         }
     };
-       
 
-    const handlePlayerChange = (selectedOption) => {
-        setSelectedPlayer(selectedOption);
-        if (selectedOption && yColumn) {
-            fetchPlayerData(selectedOption.value, selectedTable);
-        }
-    };
-    
-
-    {/*
-    const fetchTableData = async () => {
+    const fetchColumns = async (table_name, year) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/get_table_data/${selectedTable}`);
-            if (!response.ok) {
-                throw new Error(`Could not fetch data from ${selectedTable}`);
-            }
-            const { columns, data } = await response.json();
-            if (!Array.isArray(data)) {
-                throw new Error("Expected 'data' to be an array");
-            }
-            setTableData({ columns, data });
-            setFilteredData({ columns, data });
-            setError(null);
-            const columnNames = data.length > 0 ? Object.keys(data[0]) : [];
-            setColumns(columnNames);
-            if (columnNames.length >= 2) {
-                setYColumn(columnNames[1]);
-            }
+            const response = await fetch(`http://127.0.0.1:5000/get_all_columns/${table_name}`);
+            if (!response.ok) throw new Error('Failed to fetch columns');
+            const { columns } = await response.json();
+            setColumns(columns);
         } catch (err) {
-            console.error(err);
             setError(err.message);
-            setTableData([]);
-            setColumns([]);
-            setFilteredData({ columns: [], data: [] });
         }
     };
-    */}
 
     useEffect(() => {
         const yearTables = allTables[selectedYear] || [];
@@ -148,24 +88,14 @@ const PlayerPage = () => {
     }, [selectedYear]);
 
     useEffect(() => {
-        console.log("Filtered Data Columns:", filteredData.columns);
-    }, [filteredData]);    
-
-    useEffect(() => {
-        if (selectedPlayer && selectedTable) {
-            console.log(
-                `Fetching data for Player: ${selectedPlayer.label}, Table: ${selectedTable}, Y-Axis: ${yColumn}`
-            );
-            fetchPlayerData(selectedPlayer.value, selectedTable);
+        if (selectedTable) {
+            fetchColumns(selectedTable, selectedYear);
         }
-    }, [selectedPlayer, selectedTable, yColumn]);
-    
+    }, [selectedTable, selectedYear]);
 
-    {/*
-    useEffect(() => {
-        fetchTableData();
-    }, [selectedTable, selectedPlayer]);
-    */}
+    const handlePlayerChange = (selectedOption) => {
+        setSelectedPlayer(selectedOption);
+    };
 
     return (
         <div className="landing-container">
@@ -196,9 +126,6 @@ const PlayerPage = () => {
                             isClearable
                             isSearchable
                             className="mb-3"
-                            filterOption={(candidate, input) => 
-                                candidate.label && candidate.label.toLowerCase().includes(input.toLowerCase()) 
-                            }
                         />
                         <Form.Select
                             value={selectedTable}
@@ -218,12 +145,13 @@ const PlayerPage = () => {
                             onChange={(e) => setYColumn(e.target.value)}
                             className="mb-3"
                         >
-                            {(filteredData.columns || []).map((col) => (
+                            {(Array.isArray(columns) ? columns : []).map((col) => (
                                 <option key={col} value={col}>
                                     {col}
                                 </option>
                             ))}
                         </Form.Select>
+
 
                         {yColumn && (
                             <Scatterplot
@@ -241,6 +169,12 @@ const PlayerPage = () => {
                                 yAxisLabel={yColumn}
                             />
                         )}
+
+                        <DataTable
+                            selectedTable={selectedTable || []}
+                            data={filteredData.data || []}
+                            columns={[yColumn] || []}
+                        />      
 
                         {error && <p className="text-danger mt-3">{error}</p>}
                     </Col>
