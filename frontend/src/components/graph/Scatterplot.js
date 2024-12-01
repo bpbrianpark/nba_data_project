@@ -163,8 +163,8 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                             y1={yScale(linePoints[0].y)}
                             x2={xScale(linePoints[1].x)}
                             y2={yScale(linePoints[1].y)}
-                            stroke="black"
-                            strokeWidth="3"
+                            stroke="grey"
+                            strokeWidth="2"
                         />
                     )}
                     <text x={boundsWidth / 2} y={boundsHeight + 40} textAnchor="middle" fontSize="14">
