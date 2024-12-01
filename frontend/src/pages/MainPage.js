@@ -87,7 +87,6 @@ const MainPage = () => {
                             <Button variant="info" size="lg" onClick={() => navigate('/query')}>Query</Button>
                             <Button variant="info" size="lg" onClick={() => navigate('/graph')}>Graph</Button>
 
-                            {/* Year Filter */}
                             <Form.Select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(e.target.value)}
@@ -95,6 +94,7 @@ const MainPage = () => {
                             >
                                 <option value="2024">2024</option>
                                 <option value="2023">2023</option>
+                                <option value="2022">2022</option>
                             </Form.Select>
                             <Form.Select
                                 value={selectedTable}
