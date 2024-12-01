@@ -202,7 +202,6 @@ const GraphPage = () => {
                             ))}
                         </Form.Select>
 
-                        <LoadTableButton onClick={fetchTableData} />
                         <StatFilter
                                 filters={filters}
                                 onAddFilter={addFilter}
