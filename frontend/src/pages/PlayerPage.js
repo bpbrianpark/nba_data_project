@@ -4,6 +4,7 @@ import { Button, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 import { Scatterplot } from '../components/graph/Scatterplot';
+import { filter } from 'd3';
 
 const PlayerPage = () => {
     const navigate = useNavigate();
@@ -73,30 +74,43 @@ const PlayerPage = () => {
         }
     };
     
-    const fetchPlayerData = async (playerId) => {
+    const fetchPlayerData = async (playerId, table) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/get_player_stats/${playerId}`);
+            console.log("Fetching player data.");
+            const tablePrefix = table.slice(0, -5);
+            const response = await fetch(`http://127.0.0.1:5000/get_yearly_stats/${playerId}/${tablePrefix}/pts`);
             if (!response.ok) throw new Error(`Could not fetch data for player: ${playerId}`);
-            const { columns, data } = await response.json();
-            setTableData({ columns, data });
+            const { pid, stats } = await response.json();
+            if (!Array.isArray(stats)) throw new Error("Expected 'stats' to be an array");
+            const columns = ["year", "column", "value"];
+            const data = stats.map((stat) => ({
+                year: stat.year,
+                column: stat.column,
+                value: stat.value,
+            }));
+            setColumns(columns); 
             setFilteredData({ columns, data });
             setError(null);
-            setColumns(columns);
+            console.log("Columns: ", columns);
             if (columns.length >= 2) {
-                setXColumn(columns[0]);
-                setYColumn(columns[1]);
+                setYColumn(columns[2]);
             }
         } catch (err) {
             console.error(err);
             setError(err.message);
         }
     };
+       
 
     const handlePlayerChange = (selectedOption) => {
         setSelectedPlayer(selectedOption);
-        if (selectedOption) fetchPlayerData(selectedOption.value);
+        if (selectedOption && yColumn) {
+            fetchPlayerData(selectedOption.value, selectedTable);
+        }
     };
+    
 
+    {/*
     const fetchTableData = async () => {
         try {
             const response = await fetch(`http://127.0.0.1:5000/get_table_data/${selectedTable}`);
@@ -113,7 +127,6 @@ const PlayerPage = () => {
             const columnNames = data.length > 0 ? Object.keys(data[0]) : [];
             setColumns(columnNames);
             if (columnNames.length >= 2) {
-                setXColumn(columnNames[0]);
                 setYColumn(columnNames[1]);
             }
         } catch (err) {
@@ -124,6 +137,7 @@ const PlayerPage = () => {
             setFilteredData({ columns: [], data: [] });
         }
     };
+    */}
 
     useEffect(() => {
         const yearTables = allTables[selectedYear] || [];
@@ -134,8 +148,24 @@ const PlayerPage = () => {
     }, [selectedYear]);
 
     useEffect(() => {
+        console.log("Filtered Data Columns:", filteredData.columns);
+    }, [filteredData]);    
+
+    useEffect(() => {
+        if (selectedPlayer && selectedTable) {
+            console.log(
+                `Fetching data for Player: ${selectedPlayer.label}, Table: ${selectedTable}, Y-Axis: ${yColumn}`
+            );
+            fetchPlayerData(selectedPlayer.value, selectedTable);
+        }
+    }, [selectedPlayer, selectedTable, yColumn]);
+    
+
+    {/*
+    useEffect(() => {
         fetchTableData();
     }, [selectedTable, selectedPlayer]);
+    */}
 
     return (
         <div className="landing-container">
@@ -167,21 +197,17 @@ const PlayerPage = () => {
                             isSearchable
                             className="mb-3"
                             filterOption={(candidate, input) => 
-                                candidate.label && candidate.label.toLowerCase().includes(input.toLowerCase())  // Safeguard against undefined label
+                                candidate.label && candidate.label.toLowerCase().includes(input.toLowerCase()) 
                             }
                         />
-
-
-
-                        <Form.Label>X-Axis:</Form.Label>
                         <Form.Select
-                            value={xColumn}
-                            onChange={(e) => setXColumn(e.target.value)}
+                            value={selectedTable}
+                            onChange={(e) => setSelectedTable(e.target.value)}
                             className="mb-3"
                         >
-                            {columns.map((col) => (
-                                <option key={col} value={col}>
-                                    {col}
+                            {tables.map((table) => (
+                                <option key={table.value} value={table.value}>
+                                    {table.label}
                                 </option>
                             ))}
                         </Form.Select>
@@ -192,36 +218,31 @@ const PlayerPage = () => {
                             onChange={(e) => setYColumn(e.target.value)}
                             className="mb-3"
                         >
-                            {columns.map((col) => (
+                            {(filteredData.columns || []).map((col) => (
                                 <option key={col} value={col}>
                                     {col}
                                 </option>
                             ))}
                         </Form.Select>
 
-                        {xColumn && yColumn && (
+                        {yColumn && (
                             <Scatterplot
                                 width={700}
                                 height={500}
-                                data={filteredData.data
-                                    .filter((row) => row[xColumn] && row[yColumn])
+                                data={(filteredData.data || [])
+                                    .filter((row) => row[yColumn])
                                     .map((row) => ({
-                                        x: parseFloat(row[xColumn]),
-                                        y: parseFloat(row[yColumn]),
-                                        group: row.pos || 'N/A',
+                                        x: parseFloat(selectedYear), 
+                                        y: parseFloat(row[yColumn]), 
+                                        group: row.pos || 'N/A', 
                                         name: row.name,
                                     }))}
-                                xAxisLabel={xColumn}
+                                xAxisLabel="Year"
                                 yAxisLabel={yColumn}
                             />
                         )}
 
                         {error && <p className="text-danger mt-3">{error}</p>}
-                        <DataTable
-                            selectedTable={selectedTable || []}
-                            data={filteredData.data || []}
-                            columns={tableData.columns || []}
-                        />
                     </Col>
                 </Row>
             </Col>

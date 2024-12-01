@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from app.api_helpers import create_db, connect_to_db, col_directory
+from app.api_helpers import create_db, connect_to_db, col_directory, get_cols
 from app.scraper import scrape_year_data, scrape_all_years
 
 routes = Blueprint('routes', __name__)
@@ -41,7 +41,6 @@ def get_table_data(table_name):
         return jsonify({"error": str(e)}), 500
     
 
-# TODO: GET PLAYER ID ALONG WITH THEIR NAME
 # Get Players
 @routes.route('/get_players/<int:year>', methods=['GET'])
 def get_players(year):
@@ -63,7 +62,7 @@ def get_players(year):
     
 # Get player stats
 @routes.route('/get_yearly_stats/<int:pid>/<string:table_prefix>/<string:col_name>', methods=['GET'])
-def get_player_stats(pid, table_prefix, col_name):
+def get_yearly_stats(pid, table_prefix, col_name):
     try:
         years = range(2022, 2025)
         con = None
@@ -77,17 +76,33 @@ def get_player_stats(pid, table_prefix, col_name):
                 cur.execute(query)
                 rows = cur.fetchall()
                 if rows:
-                    stats.append({"year: ": year, "value": rows[0][0]})
+                    stats.append({
+                        "year": year,
+                        "column": col_name,
+                        "value": rows[0][0]
+                    })
             except Exception as table_error:
                 print(f"Skipping table {table_name}: {table_error}")
         cur.close()
         con.close()
         if not stats:
-            return jsonify({"message": "Player data doesn't exist in given year"}), 404
-        return jsonify({"pid": pid, "column": col_name, "stats": stats}), 200
+            return jsonify({"message": "Player data doesn't exist in the given years"}), 404
+        return jsonify({"pid": pid, "stats": stats}), 200
     except Exception as e:
         print(f"Error: {e}") 
         return jsonify({"error": str(e)}), 500
+
+# TODO: get all column names
+# Get all column names
+@routes.route('/get_all_columns/<string:table_name>', methods=['GET'])
+def get_all_columns(table_name):
+    try:
+        columns = get_cols(table_name)
+        return jsonify({"columns": columns}), 200
+    except Exception as e:
+        print(f"Error: {e}") 
+        return jsonify({"error": str(e)}), 500
+
     
 # TODO: fix the col_directory
 # Get Modified Column Name Endpoint 

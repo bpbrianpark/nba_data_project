@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from app.globals import PERGAME_COLS, PER36_COLS, PER100_COLS, ADVANCED_COLS, PBP_COLS, ADJ_SHOOTING_COLS
 
 DB_NAME = "testdb_big0"
 USER = "brianpark"
@@ -411,6 +412,25 @@ def standardize_name(raw_name):
 def generate_pid(name):
     pid = abs(hash(name)) % (2**31)
     return pid
+
+def get_cols(table_name):
+    table_prefix = table_name[:-5]
+    if table_prefix == "pergame":
+        return PERGAME_COLS
+    elif table_prefix == "per36":
+        return PER36_COLS
+    elif table_prefix == "per100":
+        return PER100_COLS
+    elif table_prefix == "advanced":
+        return ADVANCED_COLS
+    elif table_prefix == "pbp":
+        return PBP_COLS
+    elif table_prefix == "shooting":
+        return SHOOTING_COLS
+    elif table_prefix == "adj_shooting":
+        return ADJ_SHOOTING_COLS
+    else:
+        return {"error": "Table prefix not recognized"}
 
 def connect_to_db(con):
     con=psycopg2.connect(
