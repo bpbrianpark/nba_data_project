@@ -50,11 +50,13 @@ def get_players(year):
         con = None
         con = connect_to_db(con)
         cur = con.cursor()
-        cur.execute(f"SELECT DISTINCT name FROM {table_name} ORDER BY name")
+        cur.execute(f"SELECT DISTINCT pid, name FROM {table_name} ORDER BY name")
         players = cur.fetchall()
         cur.close()
         con.close()
-        return jsonify({"players": players}), 200
+
+        player_list = [{"pid": player[0], "name": player[1]} for player in players]
+        return jsonify({"players": player_list}), 200
     except Exception as e:
         print(f"Error: {e}") 
         return jsonify({"error": str(e)}), 500

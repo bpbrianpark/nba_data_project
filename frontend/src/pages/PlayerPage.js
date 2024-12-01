@@ -58,13 +58,12 @@ const PlayerPage = () => {
             const response = await fetch(`http://127.0.0.1:5000/get_players/${year}`);
             if (!response.ok) throw new Error('Failed to fetch players');
             const { players } = await response.json();
-    
             if (Array.isArray(players)) {
                 const playerOptions = players.map((player) => ({
-                    value: player[0], 
-                    label: player[0],
+                    value: player.pid,  
+                    label: player.name,
                 }));
-                setPlayers(playerOptions); 
+                setPlayers(playerOptions);
             } else {
                 throw new Error('Expected an array of players');
             }
@@ -74,8 +73,6 @@ const PlayerPage = () => {
         }
     };
     
-    
-
     const fetchPlayerData = async (playerId) => {
         try {
             const response = await fetch(`http://127.0.0.1:5000/get_player_stats/${playerId}`);
@@ -167,12 +164,14 @@ const PlayerPage = () => {
                             options={players}
                             placeholder="Search for a player..."
                             isClearable
-                            isSearchable  
+                            isSearchable
                             className="mb-3"
                             filterOption={(candidate, input) => 
-                                candidate.label.toLowerCase().includes(input.toLowerCase())
-                            } 
+                                candidate.label && candidate.label.toLowerCase().includes(input.toLowerCase())  // Safeguard against undefined label
+                            }
                         />
+
+
 
                         <Form.Label>X-Axis:</Form.Label>
                         <Form.Select
