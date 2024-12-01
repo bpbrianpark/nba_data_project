@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-DB_NAME = "testdb3"
+DB_NAME = "testdb_big0"
 USER = "brianpark"
 PASSWORD = "123"
 PORT = "5532"
@@ -25,12 +25,12 @@ def create_db():
     if not exists:
         cur.execute(f"CREATE DATABASE {dbname}")
     print(f"Database {dbname} is ready.")
-
     con.close()
 
+def create_tables(year):
     print("Creating DB: ")
     con = psycopg2.connect(
-        database=dbname,
+        database=DB_NAME,
         user=USER,
         host="localhost",
         password="123",
@@ -39,8 +39,8 @@ def create_db():
     cur = con.cursor()
 
     # Create Per Game Table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS pergame_2024(
+    query1 =f"""
+        CREATE TABLE IF NOT EXISTS pergame_{year}(
             pid INTEGER NOT NULL PRIMARY KEY,
             name VARCHAR(50) NOT NULL,
             age INTEGER NOT NULL,
@@ -72,10 +72,11 @@ def create_db():
             pf DECIMAL(4,1),
             pts DECIMAL(4,1)
         );
-    """)
+    """
+    cur.execute(query1)
     # Create Per 36 Min Table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS per36_2024(
+    query2 =f"""
+        CREATE TABLE IF NOT EXISTS per36_{year}(
             pid INTEGER NOT NULL PRIMARY KEY,
             name VARCHAR(50) NOT NULL,
             age INTEGER NOT NULL,
@@ -107,11 +108,12 @@ def create_db():
             pf DECIMAL(4,1),
             pts DECIMAL(4,1)
         );
-    """)
+    """
+    cur.execute(query2)
 
     # Create Per 100 Poss Table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS per100_2024(
+    query3=f"""
+        CREATE TABLE IF NOT EXISTS per100_{year}(
             pid INTEGER NOT NULL PRIMARY KEY,
             name VARCHAR(50) NOT NULL,
             age INTEGER NOT NULL,
@@ -145,11 +147,12 @@ def create_db():
             ortg INTEGER NOT NULL,
             drtg INTEGER NOT NULL
         );
-    """)
+    """
+    cur.execute(query3)
 
     # Create Advanced Table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS advanced_2024(
+    query4=f"""
+        CREATE TABLE IF NOT EXISTS advanced_{year}(
             pid INTEGER NOT NULL PRIMARY KEY,
             name VARCHAR(50) NOT NULL,
             age INTEGER NOT NULL,
@@ -179,11 +182,12 @@ def create_db():
             bpm DECIMAL(5,1),
             vorp DECIMAL(5,1)
         );
-    """)
+    """
+    cur.execute(query4)
 
     # Create Play-by_Play Table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS pbp_2024(
+    query5=f"""
+        CREATE TABLE IF NOT EXISTS pbp_{year}(
             pid INTEGER NOT NULL PRIMARY KEY,
             name VARCHAR(50) NOT NULL,
             age INTEGER NOT NULL,
@@ -209,11 +213,12 @@ def create_db():
             and1 INTEGER,
             blkd INTEGER
         );
-    """)
+    """
+    cur.execute(query5)
 
     # Create Shooting Table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS shooting_2024(
+    query6=f"""
+        CREATE TABLE IF NOT EXISTS shooting_{year}(
             pid INTEGER NOT NULL PRIMARY KEY,
             name VARCHAR(50) NOT NULL,
             age INTEGER NOT NULL,
@@ -245,11 +250,12 @@ def create_db():
             heave_attempt INTEGER,
             heave INTEGER
         );
-    """)
+    """
+    cur.execute(query6)
 
     # Create Adjusted Shooting Table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS adj_shooting_2024(
+    query7=f"""
+        CREATE TABLE IF NOT EXISTS adj_shooting_{year}(
             pid INTEGER NOT NULL PRIMARY KEY,
             name VARCHAR(50) NOT NULL,
             age INTEGER NOT NULL,
@@ -277,7 +283,8 @@ def create_db():
             fg_added DECIMAL(4,1),
             ts_added DECIMAL(4,1)
         );
-    """)
+    """
+    cur.execute(query7)
 
     # Verify tables
     cur.execute("""
@@ -313,7 +320,7 @@ def connect_to_db(con):
     )
     return con
 
-def add_to_pergame(columns):
+def add_to_pergame(columns, year):
     con = None
     con = connect_to_db(con)
     con.commit()
@@ -349,15 +356,13 @@ def add_to_pergame(columns):
     tov = float(safe_get(columns[26]) or 0)
     pf = float(safe_get(columns[27]) or 0)
     pts = float(safe_get(columns[28]) or 0)
-    cur.execute(
-    "INSERT INTO pergame_2024 (pid, name, age, team, pos, games_played, games_started, minutes, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    (pid, name, age, team, pos, g, gs, mp, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts)
-    )
+    query=f"INSERT INTO pergame_{year} (pid, name, age, team, pos, games_played, games_started, minutes, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query, (pid, name, age, team, pos, g, gs, mp, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts))
     con.commit()
     cur.close()
     con.close()
 
-def add_to_per36(columns):
+def add_to_per36(columns, year):
     con = None
     con = connect_to_db(con)
     con.commit()
@@ -393,15 +398,13 @@ def add_to_per36(columns):
     tov = float(safe_get(columns[26]) or 0)
     pf = float(safe_get(columns[27]) or 0)
     pts = float(safe_get(columns[28]) or 0)
-    cur.execute(
-    "INSERT INTO per36_2024 (pid, name, age, team, pos, games_played, games_started, minutes, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    (pid, name, age, team, pos, g, gs, mp, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts)
-    )
+    query=f"INSERT INTO per36_{year} (pid, name, age, team, pos, games_played, games_started, minutes, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query, (pid, name, age, team, pos, g, gs, mp, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts))
     con.commit()
     cur.close()
     con.close()
 
-def add_to_per100(columns):
+def add_to_per100(columns, year):
     con = None
     con = connect_to_db(con)
     con.commit()
@@ -439,15 +442,13 @@ def add_to_per100(columns):
     pts = float(safe_get(columns[28]) or 0)
     ortg = int(safe_get(columns[29]) or 0)
     drtg = int (safe_get(columns[30]) or 0)
-    cur.execute(
-    "INSERT INTO per100_2024 (pid, name, age, team, pos, games_played, games_started, minutes, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts, ortg, drtg) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    (pid, name, age, team, pos, g, gs, mp, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts, ortg, drtg)
-    )
+    query=f"INSERT INTO per100_{year} (pid, name, age, team, pos, games_played, games_started, minutes, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts, ortg, drtg) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query, (pid, name, age, team, pos, g, gs, mp, fg, fga, fgp, threep, threepa, threepp, twop, twopa, twopp, efg, ft, fta, ftp, orb, drb, trb, ast, stl, blk, tov, pf, pts, ortg, drtg))
     con.commit()
     cur.close()
     con.close()
 
-def add_to_advanced(columns):
+def add_to_advanced(columns, year):
     con = None
     con = connect_to_db(con)
     con.commit()
@@ -481,15 +482,13 @@ def add_to_advanced(columns):
     dbpm = float(safe_get(columns[24]) or 0)
     bpm = float(safe_get(columns[25]) or 0)
     vorp = float(safe_get(columns[26]) or 0)
-    cur.execute(
-    "INSERT INTO advanced_2024 (pid, name, age, team, pos, games_played, games_started, minutes, per, ts, threepar, ftr, orbp, drbp, trbp, astp, stlp, blkp, tovp, usg, ows, dws, ws, wsfourtyeight, obpm, dbpm, bpm, vorp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    (pid, name, age, team, pos, g, gs, mp, per, ts, threepar, ftr, orbp, drbp, trbp, astp, stlp, blkp, tovp, usg, ows, dws, ws, wsfourtyeight, obpm, dbpm, bpm, vorp)
-    )
+    query=f"INSERT INTO advanced_{year} (pid, name, age, team, pos, games_played, games_started, minutes, per, ts, threepar, ftr, orbp, drbp, trbp, astp, stlp, blkp, tovp, usg, ows, dws, ws, wsfourtyeight, obpm, dbpm, bpm, vorp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query, (pid, name, age, team, pos, g, gs, mp, per, ts, threepar, ftr, orbp, drbp, trbp, astp, stlp, blkp, tovp, usg, ows, dws, ws, wsfourtyeight, obpm, dbpm, bpm, vorp))
     con.commit()
     cur.close()
     con.close()
 
-def add_to_pbp(columns):
+def add_to_pbp(columns, year):
     con = None
     con = connect_to_db(con)
     con.commit()
@@ -519,15 +518,13 @@ def add_to_pbp(columns):
     pga = int(safe_get(columns[20]) or 0)
     and1 = int(safe_get(columns[21]) or 0)
     blkd = int(safe_get(columns[22]) or 0)
-    cur.execute(
-    "INSERT INTO pbp_2024 (pid, name, age, team, pos, games_played, games_started, minutes, positionp_pg, positionp_sg, positionp_sf, positionp_pf, positionp_c, oncourtper100, onoffper100, badpassto, lostballto, shootfoul_commit, offensivefoul_commit, shootfoul_drawn, offensivefoul_drawn, pga, and1, blkd) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    (pid, name, age, team, pos, g, gs, mp, positionp_pg, positionp_sg, positionp_sf, positionp_pf, positionp_c, oncourtper100, onoffper100, badpassto, lostballto, shootfoul_commit, offensivefoul_commit, shootfoul_drawn, offensivefoul_drawn, pga, and1, blkd)
-    )
+    query=f"INSERT INTO pbp_{year} (pid, name, age, team, pos, games_played, games_started, minutes, positionp_pg, positionp_sg, positionp_sf, positionp_pf, positionp_c, oncourtper100, onoffper100, badpassto, lostballto, shootfoul_commit, offensivefoul_commit, shootfoul_drawn, offensivefoul_drawn, pga, and1, blkd) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query, (pid, name, age, team, pos, g, gs, mp, positionp_pg, positionp_sg, positionp_sf, positionp_pf, positionp_c, oncourtper100, onoffper100, badpassto, lostballto, shootfoul_commit, offensivefoul_commit, shootfoul_drawn, offensivefoul_drawn, pga, and1, blkd))
     con.commit()
     cur.close()
     con.close()
 
-def add_to_shooting(columns):
+def add_to_shooting(columns, year):
     con = None
     con = connect_to_db(con)
     con.commit()
@@ -563,15 +560,13 @@ def add_to_shooting(columns):
     cornerthreep_p = float(safe_get(columns[26]) or 0)
     heave_attempt = int(safe_get(columns[27]) or 0)
     heave = int(safe_get(columns[28]) or 0)
-    cur.execute(
-    "INSERT INTO shooting_2024 (pid, name, age, team, pos, games_played, games_started, minutes, fgp, avg_fg_dist, twop_shotdiet, zero_three_shotdiet, three_ten_shotdiet, ten_sixteen_shotdiet, sixteen_threep_shotdiet, threep_shotdiet, twop_p, zero_three_p, three_ten_p, ten_sixteen_p, sixteen_threep_p, threep_p, twop_assisted_p, threep_assisted_p, dunk_shotdiet, dunks, cornerthreep_diet, cornerthreep_p, heave_attempt, heave) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    (pid, name, age, team, pos, g, gs, mp, fgp, avg_fg_dist, twop_shotdiet, zero_three_shotdiet, three_ten_shotdiet, ten_sixteen_shotdiet, sixteen_threep_shotdiet, threep_shotdiet, twop_p, zero_three_p, three_ten_p, ten_sixteen_p, sixteen_threep_p, threep_p, twop_assisted_p, threep_assisted_p, dunk_shotdiet, dunks, cornerthreep_diet, cornerthreep_p, heave_attempt, heave)
-    )
+    query=f"INSERT INTO shooting_{year} (pid, name, age, team, pos, games_played, games_started, minutes, fgp, avg_fg_dist, twop_shotdiet, zero_three_shotdiet, three_ten_shotdiet, ten_sixteen_shotdiet, sixteen_threep_shotdiet, threep_shotdiet, twop_p, zero_three_p, three_ten_p, ten_sixteen_p, sixteen_threep_p, threep_p, twop_assisted_p, threep_assisted_p, dunk_shotdiet, dunks, cornerthreep_diet, cornerthreep_p, heave_attempt, heave) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query,     (pid, name, age, team, pos, g, gs, mp, fgp, avg_fg_dist, twop_shotdiet, zero_three_shotdiet, three_ten_shotdiet, ten_sixteen_shotdiet, sixteen_threep_shotdiet, threep_shotdiet, twop_p, zero_three_p, three_ten_p, ten_sixteen_p, sixteen_threep_p, threep_p, twop_assisted_p, threep_assisted_p, dunk_shotdiet, dunks, cornerthreep_diet, cornerthreep_p, heave_attempt, heave))
     con.commit()
     cur.close()
     con.close()
 
-def add_to_adj_shooting(columns):
+def add_to_adj_shooting(columns, year):
     con = None
     con = connect_to_db(con)
     con.commit()
@@ -603,10 +598,8 @@ def add_to_adj_shooting(columns):
     threepar_adj = int(safe_get(columns[22]) or 0)
     fg_added = float(safe_get(columns[23]) or 0)
     ts_added = float(safe_get(columns[24]) or 0)
-    cur.execute(
-    "INSERT INTO adj_shooting_2024 (pid, name, age, team, pos, games_played, games_started, minutes, fgp, twopp, threepp, efg, ftp, ts, ftr, threepar, fg_adj, twop_adj, threep_adj, efg_adj, ft_adj, ts_adj, ftr_adj, threepar_adj, fg_added, ts_added) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    (pid, name, age, team, pos, g, gs, mp, fgp, twopp, threepp, efg, ftp, ts, ftr, threepar, fg_adj, twop_adj, threep_adj, efg_adj, ft_adj, ts_adj, ftr_adj, threepar_adj, fg_added, ts_added)
-    )
+    query=f"INSERT INTO adj_shooting_{year} (pid, name, age, team, pos, games_played, games_started, minutes, fgp, twopp, threepp, efg, ftp, ts, ftr, threepar, fg_adj, twop_adj, threep_adj, efg_adj, ft_adj, ts_adj, ftr_adj, threepar_adj, fg_added, ts_added) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    cur.execute(query, (pid, name, age, team, pos, g, gs, mp, fgp, twopp, threepp, efg, ftp, ts, ftr, threepar, fg_adj, twop_adj, threep_adj, efg_adj, ft_adj, ts_adj, ftr_adj, threepar_adj, fg_added, ts_added))
     con.commit()
     cur.close()
     con.close()
