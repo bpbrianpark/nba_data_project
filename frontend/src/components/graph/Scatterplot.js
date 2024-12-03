@@ -58,7 +58,6 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
     const allShapes = filteredData.map((d, i) => {
         const isHoveredGroup = hoveredGroup === d.group;
         const isOtherGroup = hoveredGroup && hoveredGroup !== d.group;
-
         return (
             <circle
                 key={i}
@@ -92,7 +91,6 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
 
     const toggleFilter = (group) => {
         const isActive = activeGroups.includes(group);
-
         if (isActive) {
             setActiveGroups(activeGroups.filter((item) => item !== group));
         } else {

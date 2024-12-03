@@ -188,7 +188,6 @@ const PlayerPage = () => {
                         data={filteredData.data || []}
                         columns={['year', ...(yColumn ? [yColumn] : [])]}
                     />   
-
                         {error && <p className="text-danger mt-3">{error}</p>}
                     </Col>
                 </Row>
