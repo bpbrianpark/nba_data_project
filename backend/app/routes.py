@@ -106,13 +106,13 @@ def get_all_columns(table_name):
 # Get Tables Endpoint 
 # select year, {col} FROM {table}_{year} (although maybe u can just do the table) WHERE pid=pid that you want
 # return the 3 and make it into a table
-@routes.route('/get_single_player_table_data/<int:pid>/', methods=['GET'])
-def get_single_player_table_data(table_name):
+@routes.route('/get_single_player_table_data/<int:pid>/<string:table_name>/<string:col_name>/', methods=['GET'])
+def get_single_player_table_data(pid, table_name, col_name):
     try:
         con = None
         con = connect_to_db(con)
         cur = con.cursor()
-        cur.execute(f"SELECT * FROM {table_name}")
+        cur.execute(f"SELECT {col_name} FROM {table_name} WHERE pid={pid}")
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]  
         data = [dict(zip(columns, row)) for row in rows]

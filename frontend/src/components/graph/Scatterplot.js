@@ -4,13 +4,13 @@ import { AxisLeft } from './AxisLeft';
 import { AxisBottom } from './AxisBottom';
 import { Tooltip } from './Tooltip';
 import Legend from './Legend';
-import { Row, Form, Button, Col } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 
 const MARGIN = { top: 60, right: 60, bottom: 60, left: 60 };
 const uniquePositions = ['PG', 'SG', 'SF', 'PF', 'C']; 
 const colorScale = d3.scaleOrdinal().domain(uniquePositions).range(d3.schemeCategory10);
 
-export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => {
+export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integerTicks = false, showLegend = false}) => {
     const boundsWidth = width - MARGIN.right - MARGIN.left;
     const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -122,6 +122,9 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
         }
     };
 
+    // Conditionally format ticks
+    const formatTick = integerTicks ? (tick) => Math.floor(tick) : undefined;
+
     return (
         <div>
             <div style={{ marginBottom: '10px' }}>
@@ -154,7 +157,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
                     <AxisLeft yScale={yScale} pixelsPerTick={40} width={boundsWidth} />
                     <g transform={`translate(0, ${boundsHeight})`}>
-                        <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} />
+                        <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} formatTick={formatTick} />
                     </g>
                     {allShapes}
                     {showRegressionLine && (
@@ -175,6 +178,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                     </text>
                 </g>
             </svg>
+            {showLegend && (
             <Legend
                 positions={uniquePositions}
                 colorScale={colorScale}
@@ -184,8 +188,10 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                 activeGroups={activeGroups}
                 title={'Positions'}
             />
+            )}
             <Tooltip interactionData={hovered} />
             <Row />
         </div>
     );
 };
+

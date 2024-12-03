@@ -79,6 +79,31 @@ const PlayerPage = () => {
         }
     };
 
+    const fetchYearlyStats = async (playerId, tablePrefix, colName) => {
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:5000/get_yearly_stats/${playerId}/${tablePrefix}/${colName}`
+            );
+            if (!response.ok) throw new Error('Failed to fetch yearly stats');
+            const { stats } = await response.json();
+            setFilteredData({
+                columns: ['year', colName],
+                data: stats.map(({ year, value }) => ({
+                    year: year,
+                    [colName]: parseFloat(value),
+                })),
+            });
+        } catch (err) {
+            setError(err.message);
+        }
+    };    
+
+    useEffect(() => {
+        if (selectedPlayer && yColumn) {
+            fetchYearlyStats(selectedPlayer.value, selectedTable.split('_')[0], yColumn);
+        }
+    }, [selectedPlayer, yColumn, selectedTable]);
+
     useEffect(() => {
         const yearTables = allTables[selectedYear] || [];
         setTables(yearTables);
@@ -153,23 +178,22 @@ const PlayerPage = () => {
                         </Form.Select>
 
 
-                        {yColumn && (
-                            <Scatterplot
-                                width={700}
-                                height={500}
-                                data={(filteredData.data || [])
-                                    .filter((row) => row[yColumn])
-                                    .map((row) => ({
-                                        x: parseFloat(selectedYear), 
-                                        y: parseFloat(row[yColumn]), 
-                                        group: row.pos || 'N/A', 
-                                        name: row.name,
-                                    }))}
-                                xAxisLabel="Year"
-                                yAxisLabel={yColumn}
-                            />
-                        )}
+                        {yColumn && filteredData.data.length > 0 && (
+    <Scatterplot
+        width={700}
+        height={500}
+        data={filteredData.data.map((row) => ({
+            x: row.year,
+            y: row[yColumn],
+            group: selectedPlayer?.label || 'Player',
+            name: selectedPlayer?.label || '',
+        }))}
+        xAxisLabel="Year"
+        yAxisLabel={yColumn}
+    />
+)}
 
+                    
                         <DataTable
                             selectedTable={selectedTable || []}
                             data={filteredData.data || []}

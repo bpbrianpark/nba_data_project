@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 const TICK_LENGTH = 6;
 
-export const AxisBottom = ({ xScale, pixelsPerTick }) => {
+export const AxisBottom = ({ xScale, pixelsPerTick, formatTick }) => {
   const range = xScale.range();
 
   const ticks = useMemo(() => {
@@ -33,7 +33,7 @@ export const AxisBottom = ({ xScale, pixelsPerTick }) => {
               transform: "translateY(20px)",
             }}
           >
-            {value}
+            {formatTick ? formatTick(value) : value}
           </text>
         </g>
       ))}

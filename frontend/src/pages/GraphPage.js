@@ -227,6 +227,7 @@ const GraphPage = () => {
                                         }))}
                                     xAxisLabel={xColumn}
                                     yAxisLabel={yColumn}
+                                    showLegend={true}
                                 />
                             )}
                         </div>
