@@ -77,7 +77,7 @@ def scrape_year_data(year):
         scrape_page(table_name, result_url, year)
     return ""
 
-# TODO:
+# TODO: Adjust the range to be 10
 # Webscrape all the player data for every year
 def scrape_all_years():
     start_year = 2024

@@ -2,18 +2,23 @@ import { useMemo } from "react";
 
 const TICK_LENGTH = 6;
 
-export const AxisBottom = ({ xScale, pixelsPerTick }) => {
+export const AxisBottom = ({ xScale, pixelsPerTick, formatTick }) => {
   const range = xScale.range();
 
   const ticks = useMemo(() => {
     const width = range[1] - range[0];
     const numberOfTicksTarget = Math.floor(width / pixelsPerTick);
 
-    return xScale.ticks(numberOfTicksTarget).map((value) => ({
+    let ticks = xScale.ticks(numberOfTicksTarget);
+    if (formatTick) {
+      ticks = ticks.filter((tick) => Number.isInteger(tick));
+    }
+
+    return ticks.map((value) => ({
       value,
       xOffset: xScale(value),
     }));
-  }, [xScale, range, pixelsPerTick]);
+  }, [xScale, range, pixelsPerTick, formatTick]);
 
   return (
     <>

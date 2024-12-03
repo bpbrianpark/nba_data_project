@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from app.globals import PERGAME_COLS, PER36_COLS, PER100_COLS, ADVANCED_COLS, PBP_COLS, SHOOTING_COLS, ADJ_SHOOTING_COLS
 
 DB_NAME = "testdb_big0"
 USER = "brianpark"
@@ -298,6 +299,109 @@ def create_tables(year):
     cur.close()
     con.close()
 
+# TODO: Fix, there's a problem with the years
+def col_directory(col_name):
+    column_map = {
+        "pid": "ID",
+        "name": "NAME",
+        "age": "AGE",
+        "team": "TEAM",
+        "pos": "POS",
+        "games_played": "GP",
+        "games_started": "GS",
+        "minutes": "MP",
+        "fg": "FG",
+        "fga": "FGA",
+        "fgp": "FG%",
+        "threep": "3PM",
+        "threepa": "3PA",
+        "threepp": "3P%",
+        "twop": "2PM",
+        "twopa": "2PA",
+        "twopp": "2P%",
+        "efg": "eFG%",
+        "ft": "FTM",
+        "fta": "FTA",
+        "ftp": "FT%",
+        "orb": "ORB",
+        "drb": "DRB",
+        "trb": "TRB",
+        "ast": "AST",
+        "stl": "STL",
+        "blk": "BLK",
+        "tov": "TO",
+        "pf": "PF",
+        "ortg": "ORTG",
+        "drtg": "DRTG",
+        "per": "PER",
+        "ts": "TS%",
+        "threepar": "3PAr",
+        "ftr": "FTR",
+        "orbp": "ORBD%",
+        "drbp": "DRBD%",
+        "trbp": "TRB%",
+        "astp": "AST%",
+        "stlp": "STL%",
+        "blkp": "BLK%",
+        "tovp": "TO%",
+        "usg": "USG",
+        "ows": "OWS",
+        "dws": "DWS",
+        "ws": "WS",
+        "wsfourtyeight": "WS/48",
+        "obpm": "OBPM",
+        "dbpm": "DBPM",
+        "bpm": "BPM",
+        "vorp": "VORP",
+        "positionp_pg": "PG%",
+        "positionp_sg": "SG%",
+        "positionp_sf": "SF%",
+        "positionp_pf": "PF%",
+        "positionp_c": "C%",
+        "oncourtper100": "OnCourt/100",
+        "onoffper100": "OnOff/100",
+        "badpassto": "BadPass",
+        "lostballto": "LostBall",
+        "shootfoul_commit": "Shooting Fouls",
+        "offensivefoul_commit": "Offensive Fouls",
+        "shootfoul_drawn": "Shooting Fouls Drawn",
+        "offensivefoul_drawn": "Offensive Fouls Drawn",
+        "pga": "PGA",
+        "and1": "And1",
+        "blkd": "Blkd",
+        "avg_fg_dist": "Dist.",
+        "twop_shotdiet": "2PD",
+        "zero_three_shotdiet": "0-3D",
+        "three_ten_shotdiet": "3-10D",
+        "ten_sixteen_shotdiet": "10-16D",
+        "sixteen_threep_shotdiet": "16+D",
+        "threep_shotdiet": "3PD",
+        "zero_three_p": "0-3%",
+        "three_ten_p": "3-10%",
+        "ten_sixteen_p": "10-16%",
+        "sixteen_threep_p": "16+%",
+        "twop_assisted_p": "2Pa%",
+        "threep_assisted_p": "3Pa%",
+        "dunk_shotdiet": "DunkD",
+        "dunks": "Dunks",
+        "cornerthreep_diet": "%3PA",
+        "cornerthreep_p": "Corner3PA",
+        "heave_attempt": "Heave Att.",
+        "heave": "Heave",
+        "fg_adj": "FG%A",
+        "twopp_adj": "2P%A",
+        "threepp_adj": "3P%A",
+        "efg_adj": "eFG%A",
+        "ft_adj": "FT%A",
+        "ts_adj": "TS%A",
+        "ftr_adj": "FTR%A",
+        "threepar_adj": "3PAr%A",
+        "fg_added": "FG Add",
+        "ts_added": "TS Add"
+    }
+    return column_map.get(col_name)
+
+
 def safe_get(column):
     return column.text.strip() if column.text.strip() else None
 
@@ -308,6 +412,25 @@ def standardize_name(raw_name):
 def generate_pid(name):
     pid = abs(hash(name)) % (2**31)
     return pid
+
+def get_cols(table_name):
+    table_prefix = table_name[:-5]
+    if table_prefix == "pergame":
+        return PERGAME_COLS
+    elif table_prefix == "per36":
+        return PER36_COLS
+    elif table_prefix == "per100":
+        return PER100_COLS
+    elif table_prefix == "advanced":
+        return ADVANCED_COLS
+    elif table_prefix == "pbp":
+        return PBP_COLS
+    elif table_prefix == "shooting":
+        return SHOOTING_COLS
+    elif table_prefix == "adj_shooting":
+        return ADJ_SHOOTING_COLS
+    else:
+        return {"error": "Table prefix not recognized"}
 
 def connect_to_db(con):
     con=psycopg2.connect(

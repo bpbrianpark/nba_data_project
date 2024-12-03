@@ -4,13 +4,13 @@ import { AxisLeft } from './AxisLeft';
 import { AxisBottom } from './AxisBottom';
 import { Tooltip } from './Tooltip';
 import Legend from './Legend';
-import { Row, Form, Button, Col } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 
 const MARGIN = { top: 60, right: 60, bottom: 60, left: 60 };
 const uniquePositions = ['PG', 'SG', 'SF', 'PF', 'C']; 
 const colorScale = d3.scaleOrdinal().domain(uniquePositions).range(d3.schemeCategory10);
 
-export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => {
+export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integerTicks = false, showLegend = false}) => {
     const boundsWidth = width - MARGIN.right - MARGIN.left;
     const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -58,7 +58,6 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
     const allShapes = filteredData.map((d, i) => {
         const isHoveredGroup = hoveredGroup === d.group;
         const isOtherGroup = hoveredGroup && hoveredGroup !== d.group;
-
         return (
             <circle
                 key={i}
@@ -92,7 +91,6 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
 
     const toggleFilter = (group) => {
         const isActive = activeGroups.includes(group);
-
         if (isActive) {
             setActiveGroups(activeGroups.filter((item) => item !== group));
         } else {
@@ -154,7 +152,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
                     <AxisLeft yScale={yScale} pixelsPerTick={40} width={boundsWidth} />
                     <g transform={`translate(0, ${boundsHeight})`}>
-                        <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} />
+                        <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} formatTick={integerTicks} />
                     </g>
                     {allShapes}
                     {showRegressionLine && (
@@ -163,8 +161,8 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                             y1={yScale(linePoints[0].y)}
                             x2={xScale(linePoints[1].x)}
                             y2={yScale(linePoints[1].y)}
-                            stroke="black"
-                            strokeWidth="3"
+                            stroke="grey"
+                            strokeWidth="2"
                         />
                     )}
                     <text x={boundsWidth / 2} y={boundsHeight + 40} textAnchor="middle" fontSize="14">
@@ -175,6 +173,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                     </text>
                 </g>
             </svg>
+            {showLegend && (
             <Legend
                 positions={uniquePositions}
                 colorScale={colorScale}
@@ -184,8 +183,10 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel }) => 
                 activeGroups={activeGroups}
                 title={'Positions'}
             />
+            )}
             <Tooltip interactionData={hovered} />
             <Row />
         </div>
     );
 };
+

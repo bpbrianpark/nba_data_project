@@ -152,6 +152,7 @@ const GraphPage = () => {
                         <Button variant='info' size='lg' onClick={() => navigate('/database')}>Main Page</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
+                        <Button variant='info' size='lg' onClick={() => navigate('/playerpage')}>Player</Button>
 
                         <Form.Select
                                 value={selectedYear}
@@ -201,7 +202,6 @@ const GraphPage = () => {
                             ))}
                         </Form.Select>
 
-                        <LoadTableButton onClick={fetchTableData} />
                         <StatFilter
                                 filters={filters}
                                 onAddFilter={addFilter}
@@ -227,6 +227,7 @@ const GraphPage = () => {
                                         }))}
                                     xAxisLabel={xColumn}
                                     yAxisLabel={yColumn}
+                                    showLegend={true}
                                 />
                             )}
                         </div>
