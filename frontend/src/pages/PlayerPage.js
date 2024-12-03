@@ -17,6 +17,7 @@ const PlayerPage = () => {
     const [tables, setTables] = useState([]); 
     const [error, setError] = useState(null);
 
+    // TODO: add more years, make it less hardcoded
     const allTables = {
         2024: [
             { value: 'pergame_2024', label: 'Per Game' },
