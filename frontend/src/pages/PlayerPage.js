@@ -4,15 +4,12 @@ import { Button, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 import { Scatterplot } from '../components/graph/Scatterplot';
-import { filter } from 'd3';
 
 const PlayerPage = () => {
     const navigate = useNavigate();
     const [selectedYear, setSelectedYear] = useState('2024');
     const [selectedTable, setSelectedTable] = useState('pergame_2024');
-    const [tableData, setTableData] = useState([]);
     const [filteredData, setFilteredData] = useState({ columns: [], data: [] });
-    const [xColumn, setXColumn] = useState('');
     const [yColumn, setYColumn] = useState('');
     const [columns, setColumns] = useState([]);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
@@ -130,7 +127,6 @@ const PlayerPage = () => {
                         <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/playerpage')}>Player</Button>
-
                         <Form.Select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(e.target.value)}
@@ -140,7 +136,6 @@ const PlayerPage = () => {
                             <option value="2023">2023</option>
                             <option value="2022">2022</option>
                         </Form.Select>
-
                         <Select
                             value={selectedPlayer}
                             onChange={handlePlayerChange}
@@ -161,7 +156,6 @@ const PlayerPage = () => {
                                 </option>
                             ))}
                         </Form.Select>
-
                         <Form.Label>Y-Axis:</Form.Label>
                         <Form.Select
                             value={yColumn}
@@ -174,8 +168,6 @@ const PlayerPage = () => {
                                 </option>
                             ))}
                         </Form.Select>
-
-
                         {yColumn && filteredData.data.length > 0 && (
                         <Scatterplot
                             width={700}
@@ -191,13 +183,11 @@ const PlayerPage = () => {
                             integerTicks={true}
                         />
                     )}
-
-                    
-                        <DataTable
-                            selectedTable={selectedTable || []}
-                            data={filteredData.data || []}
-                            columns={[yColumn] || []}
-                        />      
+                    <DataTable
+                        selectedTable={selectedTable || []}
+                        data={filteredData.data || []}
+                        columns={['year', ...(yColumn ? [yColumn] : [])]}
+                    />   
 
                         {error && <p className="text-danger mt-3">{error}</p>}
                     </Col>
