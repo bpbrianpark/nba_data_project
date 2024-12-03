@@ -122,9 +122,6 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
         }
     };
 
-    // Conditionally format ticks
-    const formatTick = integerTicks ? (tick) => Math.floor(tick) : undefined;
-
     return (
         <div>
             <div style={{ marginBottom: '10px' }}>
@@ -157,7 +154,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
                 <g width={boundsWidth} height={boundsHeight} transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
                     <AxisLeft yScale={yScale} pixelsPerTick={40} width={boundsWidth} />
                     <g transform={`translate(0, ${boundsHeight})`}>
-                        <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} formatTick={formatTick} />
+                        <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} formatTick={integerTicks} />
                     </g>
                     {allShapes}
                     {showRegressionLine && (

@@ -9,11 +9,16 @@ export const AxisBottom = ({ xScale, pixelsPerTick, formatTick }) => {
     const width = range[1] - range[0];
     const numberOfTicksTarget = Math.floor(width / pixelsPerTick);
 
-    return xScale.ticks(numberOfTicksTarget).map((value) => ({
+    let ticks = xScale.ticks(numberOfTicksTarget);
+    if (formatTick) {
+      ticks = ticks.filter((tick) => Number.isInteger(tick));
+    }
+
+    return ticks.map((value) => ({
       value,
       xOffset: xScale(value),
     }));
-  }, [xScale, range, pixelsPerTick]);
+  }, [xScale, range, pixelsPerTick, formatTick]);
 
   return (
     <>
@@ -33,7 +38,7 @@ export const AxisBottom = ({ xScale, pixelsPerTick, formatTick }) => {
               transform: "translateY(20px)",
             }}
           >
-            {formatTick ? formatTick(value) : value}
+            {value}
           </text>
         </g>
       ))}
