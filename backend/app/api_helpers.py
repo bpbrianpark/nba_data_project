@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-from app.globals import PERGAME_COLS, PER36_COLS, PER100_COLS, ADVANCED_COLS, PBP_COLS, ADJ_SHOOTING_COLS
+from app.globals import PERGAME_COLS, PER36_COLS, PER100_COLS, ADVANCED_COLS, PBP_COLS, SHOOTING_COLS, ADJ_SHOOTING_COLS
 
 DB_NAME = "testdb_big0"
 USER = "brianpark"
