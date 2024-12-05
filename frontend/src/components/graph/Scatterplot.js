@@ -10,7 +10,7 @@ const MARGIN = { top: 60, right: 60, bottom: 60, left: 60 };
 const uniquePositions = ['PG', 'SG', 'SF', 'PF', 'C']; 
 const colorScale = d3.scaleOrdinal().domain(uniquePositions).range(d3.schemeCategory10);
 
-export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integerTicks = false, showLegend = false}) => {
+export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integerTicks = false, showLegend = false, showLines = false}) => {
     const boundsWidth = width - MARGIN.right - MARGIN.left;
     const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -119,6 +119,31 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
             setPredictedY(y);
         }
     };
+    const groupedData = d3.group(
+        [...filteredData].sort((a, b) => a.x - b.x),
+        (d) => d.group
+    );
+
+    const lineGenerator = d3
+    .line()
+    .x((d) => xScale(d.x))
+    .y((d) => yScale(d.y));
+
+    const allLines = showLines
+        ? Array.from(groupedData.entries()).map(([group, points], i) => (
+            <path
+                key={group}
+                d={lineGenerator(points)}
+                fill="none"
+                stroke={colorScale(group)}
+                strokeWidth={2}
+                opacity={hoveredGroup && hoveredGroup !== group ? 0.3 : 1}
+                style={{ transition: 'all 0.3s ease' }}
+                onMouseEnter={() => setHoveredGroup(group)}
+                onMouseLeave={() => setHoveredGroup(null)}
+            />
+        ))
+        : null;
 
     return (
         <div>
@@ -154,7 +179,8 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
                     <g transform={`translate(0, ${boundsHeight})`}>
                         <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} formatTick={integerTicks} />
                     </g>
-                    {allShapes}
+                    {allLines} {/* Render the lines */}
+                    {allShapes} {/* Render the scatterplot points */}
                     {showRegressionLine && (
                         <line
                             x1={xScale(linePoints[0].x)}
@@ -173,6 +199,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
                     </text>
                 </g>
             </svg>
+
             {showLegend && (
             <Legend
                 positions={uniquePositions}

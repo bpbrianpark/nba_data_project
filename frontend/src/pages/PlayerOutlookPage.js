@@ -84,13 +84,14 @@ const PlayerOutlookPage = () => {
             
             const { stats } = await response.json();
     
+            // Extract all columns dynamically from the response
             const allColumns = Array.from(new Set(stats.flatMap(({ data }) => Object.keys(data))));
     
             setFilteredData({
-                columns: ['year', ...allColumns], 
+                columns: ['year', ...allColumns], // Include year and all stat columns
                 data: stats.map(({ year, data }) => ({
                     year,
-                    ...data, 
+                    ...data, // Spread all column data for each year
                 })),
             });
         } catch (err) {
@@ -133,7 +134,6 @@ const PlayerOutlookPage = () => {
                         <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/playerpage')}>Player</Button>
-                        <Button variant='info' size='lg' onClick={() => navigate('/playeroutlook')}>Player Outlook</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/playercomp')}>Player Comp</Button>
                         <Form.Select
                             value={selectedYear}

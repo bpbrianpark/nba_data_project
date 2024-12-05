@@ -6,6 +6,7 @@ import './App.css'
 import { BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import PlayerPage from './pages/PlayerPage';
 import PlayerOutlookPage from './pages/PlayerOutlookPage';
+import PlayerCompPage from './pages/PlayerCompPage';
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/graph" element={<GraphPage/>} />
         <Route path="/playerpage" element={<PlayerPage/>} />
         <Route path="/playeroutlook" element={<PlayerOutlookPage/>} />
+        <Route path="/playercomp" element={<PlayerCompPage/>} />
       </Routes>
     </BrowserRouter>
   );

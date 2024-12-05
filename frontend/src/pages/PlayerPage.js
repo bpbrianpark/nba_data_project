@@ -183,6 +183,7 @@ const PlayerPage = () => {
                             xAxisLabel="Year"
                             yAxisLabel={yColumn}
                             integerTicks={true}
+                            showLines={true}
                         />
                     )}
                     <DataTable

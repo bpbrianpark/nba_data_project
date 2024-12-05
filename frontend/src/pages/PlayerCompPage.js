@@ -9,7 +9,8 @@ const PlayerCompPage = () => {
     const navigate = useNavigate();
     const [selectedYear, setSelectedYear] = useState('2024');
     const [selectedTable, setSelectedTable] = useState('pergame_2024');
-    const [filteredData, setFilteredData] = useState({ columns: [], data: [] });
+    const [filteredDataPlayers, setFilteredDataPlayers] = useState({ columns: [], data: [] });
+    const [graphFilteredData, setGraphFilteredData] = useState({ columns: [], data: [] });
     const [yColumn, setYColumn] = useState('');
     const [columns, setColumns] = useState([]);
     const [selectedPlayers, setSelectedPlayers] = useState([]);
@@ -46,6 +47,7 @@ const PlayerCompPage = () => {
             { value: 'adj_shooting_2022', label: 'Adjusted Shooting' },
         ]
     };
+
     useEffect(() => {
         fetchPlayers(selectedYear);
     }, [selectedYear]);
@@ -76,44 +78,96 @@ const PlayerCompPage = () => {
         }
     };
 
-    const fetchStats = async (playerIds, tablePrefix, selectedYear) => {
-        try {
-            const statsData = [];
+    const fetchOneYearStats = async (playerIds, tablePrefix) => {
+    try {
+        const statsData = {};
+        const originalOrder = []; 
 
-            for (const playerId of playerIds) {
-                const response = await fetch(
-                    `http://127.0.0.1:5000/get_stats_all_cols/${playerId}/${tablePrefix}/${selectedYear}`
-                );
-                if (!response.ok) throw new Error('Failed to fetch yearly stats');
-                
-                const { stats } = await response.json();
-                stats.forEach(({ year, data }) => {
-                    statsData.push({ 
-                        year, 
-                        player: players.find((p) => p.value === playerId)?.label || `Player ${playerId}`, 
-                        ...data 
-                    });
-                });
-            }
-
-            const allColumns = Array.from(
-                new Set(statsData.flatMap((stat) => Object.keys(stat)))
+        for (const playerId of playerIds) {
+            const response = await fetch(
+                `http://127.0.0.1:5000/get_yearly_stats_all_cols/${playerId}/${tablePrefix}/`
             );
+            if (!response.ok) throw new Error('Failed to fetch yearly stats');
+            const { stats } = await response.json();
+            const playerName = players.find((p) => p.value === playerId)?.label || `Player ${playerId}`;
+            statsData[playerName] = {};
 
-            setFilteredData({
-                columns: ['year', 'player', ...allColumns.filter((col) => col !== 'year' && col !== 'player')],
-                data: statsData,
+            stats.forEach(({ data }) => {
+                Object.entries(data).forEach(([stat, value]) => {
+                    if (!originalOrder.includes(stat)) {
+                        originalOrder.push(stat); 
+                    }
+                    statsData[playerName][stat] = value; 
+                });
             });
-        } catch (err) {
-            setError(err.message);
         }
-    };
+
+        const formattedData = originalOrder.map((stat) => {
+            const row = { stat }; 
+            playerIds.forEach((playerId) => {
+                const playerName = players.find((p) => p.value === playerId)?.label || `Player ${playerId}`;
+                row[playerName] = statsData[playerName]?.[stat] || '-'; 
+            });
+            return row;
+        });
+        console.log("Filtered Data:", filteredDataPlayers.data);
+        setFilteredDataPlayers({
+            columns: ['stat', ...playerIds.map((id) => players.find((p) => p.value === id)?.label || `Player ${id}`)],
+            data: formattedData,
+        });
+    } catch (err) {
+        setError(err.message);
+    }
+};
+
+const fetchYearlyStats = async (playerIds, tablePrefix, colName) => {
+    try {
+        const statsData = {}; 
+
+        for (const playerId of playerIds) {
+            const response = await fetch(
+                `http://127.0.0.1:5000/get_yearly_stats/${playerId}/${tablePrefix}/${colName}`
+            );
+            if (!response.ok) throw new Error('Failed to fetch yearly stats');
+            const { stats } = await response.json();
+            const playerName = players.find((p) => p.value === playerId)?.label || `Player ${playerId}`;
+            statsData[playerName] = stats.map(({ year, value }) => ({
+                year: parseInt(year, 10),
+                value: parseFloat(value), 
+            }));
+        }
+        const scatterplotData = [];
+        Object.entries(statsData).forEach(([playerName, yearlyStats]) => {
+            yearlyStats.forEach(({ year, value }) => {
+                scatterplotData.push({
+                    x: year, 
+                    y: value,
+                    group: playerName, 
+                    name: playerName, 
+                });
+            });
+        });
+
+        setGraphFilteredData(scatterplotData); 
+    } catch (err) {
+        setError(err.message);
+    }
+};
+
+
+useEffect(() => {
+    if (selectedPlayers.length > 0 && yColumn) {
+        fetchYearlyStats(selectedPlayers.map((p) => p.value), selectedTable.split('_')[0], yColumn);
+    }
+}, [selectedPlayers, selectedTable, yColumn]);
+
+    
 
     useEffect(() => {
         if (selectedPlayers.length > 0) {
-            fetchStats(selectedPlayers.map((p) => p.value), selectedTable.split('_')[0], selectedYear);
+            fetchOneYearStats(selectedPlayers.map((p) => p.value), selectedTable.split('_')[0]);
         }
-    }, [selectedPlayers, selectedTable, selectedYear]);
+    }, [selectedPlayers, selectedTable]);
 
     useEffect(() => {
         const yearTables = allTables[selectedYear] || [];
@@ -173,10 +227,35 @@ const PlayerCompPage = () => {
                                 </option>
                             ))}
                         </Form.Select>
+                        <Form.Label>Y-Axis:</Form.Label>
+                        <Form.Select
+                            value={yColumn}
+                            onChange={(e) => setYColumn(e.target.value)}
+                            className="mb-3"
+                        >
+                            {columns.map((col) => (
+                                <option key={col} value={col}>
+                                    {col}
+                                </option>
+                            ))}
+                        </Form.Select>
+                        {yColumn && filteredDataPlayers.data.length > 0 && (
+                        <Scatterplot
+                        width={700}
+                        height={500}
+                        data={graphFilteredData} 
+                        xAxisLabel="Year"
+                        yAxisLabel={yColumn}
+                        integerTicks={true}
+                        showLines={true} 
+                    />
+                    
+                    )}
+
                         <DataTable
                             selectedTable={selectedTable || []}
-                            data={filteredData.data || []}
-                            columns={filteredData.columns || []}
+                            data={filteredDataPlayers.data || []}
+                            columns={filteredDataPlayers.columns || []}
                         />
                         {error && <p className="text-danger mt-3">{error}</p>}
                     </Col>
