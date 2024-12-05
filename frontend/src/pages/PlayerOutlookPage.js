@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 import { Scatterplot } from '../components/graph/Scatterplot';
 
-const PlayerPage = () => {
+const PlayerOutlookPage = () => {
     const navigate = useNavigate();
     const [selectedYear, setSelectedYear] = useState('2024');
     const [selectedTable, setSelectedTable] = useState('pergame_2024');
@@ -77,28 +77,34 @@ const PlayerPage = () => {
         }
     };
 
-    const fetchYearlyStats = async (playerId, tablePrefix, colName) => {
+    const fetchYearlyStats = async (playerId, tablePrefix) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/get_yearly_stats/${playerId}/${tablePrefix}/${colName}`);
+            const response = await fetch(`http://127.0.0.1:5000/get_yearly_stats_all_cols/${playerId}/${tablePrefix}/`);
             if (!response.ok) throw new Error('Failed to fetch yearly stats');
+            
             const { stats } = await response.json();
+    
+            // Extract all columns dynamically from the response
+            const allColumns = Array.from(new Set(stats.flatMap(({ data }) => Object.keys(data))));
+    
             setFilteredData({
-                columns: ['year', colName],
-                data: stats.map(({ year, value }) => ({
-                    year: year,
-                    [colName]: parseFloat(value),
+                columns: ['year', ...allColumns], // Include year and all stat columns
+                data: stats.map(({ year, data }) => ({
+                    year,
+                    ...data, // Spread all column data for each year
                 })),
             });
         } catch (err) {
             setError(err.message);
         }
-    };    
+    };
+       
 
     useEffect(() => {
-        if (selectedPlayer && yColumn) {
-            fetchYearlyStats(selectedPlayer.value, selectedTable.split('_')[0], yColumn);
+        if (selectedPlayer) {
+            fetchYearlyStats(selectedPlayer.value, selectedTable.split('_')[0]);
         }
-    }, [selectedPlayer, yColumn, selectedTable]);
+    }, [selectedPlayer, selectedTable]);
 
     useEffect(() => {
         const yearTables = allTables[selectedYear] || [];
@@ -128,7 +134,6 @@ const PlayerPage = () => {
                         <Button variant='info' size='lg' onClick={() => navigate('/query')}>Query</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/graph')}>Graph</Button>
                         <Button variant='info' size='lg' onClick={() => navigate('/playerpage')}>Player</Button>
-                        <Button variant='info' size='lg' onClick={() => navigate('/playeroutlook')}>Player Outlook</Button>
                         <Form.Select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(e.target.value)}
@@ -158,37 +163,10 @@ const PlayerPage = () => {
                                 </option>
                             ))}
                         </Form.Select>
-                        <Form.Label>Y-Axis:</Form.Label>
-                        <Form.Select
-                            value={yColumn}
-                            onChange={(e) => setYColumn(e.target.value)}
-                            className="mb-3"
-                        >
-                            {(Array.isArray(columns) ? columns : []).map((col) => (
-                                <option key={col} value={col}>
-                                    {col}
-                                </option>
-                            ))}
-                        </Form.Select>
-                        {yColumn && filteredData.data.length > 0 && (
-                        <Scatterplot
-                            width={700}
-                            height={500}
-                            data={filteredData.data.map((row) => ({
-                                x: row.year,
-                                y: row[yColumn],
-                                group: selectedPlayer?.label || 'Player',
-                                name: selectedPlayer?.label || '',
-                            }))}
-                            xAxisLabel="Year"
-                            yAxisLabel={yColumn}
-                            integerTicks={true}
-                        />
-                    )}
                     <DataTable
                         selectedTable={selectedTable || []}
                         data={filteredData.data || []}
-                        columns={['year', ...(yColumn ? [yColumn] : [])]}
+                        columns={['year', ...(columns)]}
                     />   
                         {error && <p className="text-danger mt-3">{error}</p>}
                     </Col>
@@ -198,4 +176,4 @@ const PlayerPage = () => {
     );
 };
 
-export default PlayerPage;
+export default PlayerOutlookPage;
