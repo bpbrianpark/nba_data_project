@@ -88,8 +88,11 @@ const PlayerCompPage = () => {
                 `http://127.0.0.1:5000/get_yearly_stats_all_cols/${playerId}/${tablePrefix}/`
             );
             if (!response.ok) throw new Error('Failed to fetch yearly stats');
+
             const { stats } = await response.json();
             const playerName = players.find((p) => p.value === playerId)?.label || `Player ${playerId}`;
+
+            // Initialize player data
             statsData[playerName] = {};
 
             stats.forEach(({ data }) => {
@@ -122,33 +125,38 @@ const PlayerCompPage = () => {
 
 const fetchYearlyStats = async (playerIds, tablePrefix, colName) => {
     try {
-        const statsData = {}; 
+        const statsData = {}; // To store stats for all players across all years
 
         for (const playerId of playerIds) {
             const response = await fetch(
                 `http://127.0.0.1:5000/get_yearly_stats/${playerId}/${tablePrefix}/${colName}`
             );
             if (!response.ok) throw new Error('Failed to fetch yearly stats');
+
             const { stats } = await response.json();
             const playerName = players.find((p) => p.value === playerId)?.label || `Player ${playerId}`;
+
+            // Store stats for this player
             statsData[playerName] = stats.map(({ year, value }) => ({
                 year: parseInt(year, 10),
-                value: parseFloat(value), 
+                value: parseFloat(value), // Parse value as a float
             }));
         }
+
+        // Flatten data into a format suitable for the scatterplot
         const scatterplotData = [];
         Object.entries(statsData).forEach(([playerName, yearlyStats]) => {
             yearlyStats.forEach(({ year, value }) => {
                 scatterplotData.push({
-                    x: year, 
-                    y: value,
-                    group: playerName, 
-                    name: playerName, 
+                    x: year, // Year on the X-axis
+                    y: value, // Selected stat (Y-axis)
+                    group: playerName, // Group by player name
+                    name: playerName, // Display player name on hover
                 });
             });
         });
 
-        setGraphFilteredData(scatterplotData); 
+        setGraphFilteredData(scatterplotData); // Save data for the scatterplot
     } catch (err) {
         setError(err.message);
     }
@@ -156,10 +164,12 @@ const fetchYearlyStats = async (playerIds, tablePrefix, colName) => {
 
 
 useEffect(() => {
+    // Ensure both selectedPlayers and yColumn are set before fetching stats
     if (selectedPlayers.length > 0 && yColumn) {
         fetchYearlyStats(selectedPlayers.map((p) => p.value), selectedTable.split('_')[0], yColumn);
     }
-}, [selectedPlayers, selectedTable, yColumn]);
+}, [selectedPlayers, selectedTable, yColumn]); // Only re-run when either of these dependencies change
+
 
     
 
@@ -239,18 +249,19 @@ useEffect(() => {
                                 </option>
                             ))}
                         </Form.Select>
-                        {yColumn && filteredDataPlayers.data.length > 0 && (
+                        {yColumn && selectedPlayers.length > 0 && graphFilteredData.length > 0 && (
                         <Scatterplot
-                        width={700}
-                        height={500}
-                        data={graphFilteredData} 
-                        xAxisLabel="Year"
-                        yAxisLabel={yColumn}
-                        integerTicks={true}
-                        showLines={true} 
-                    />
-                    
+                            width={700}
+                            height={500}
+                            data={graphFilteredData}
+                            xAxisLabel="Year"
+                            yAxisLabel={yColumn}
+                            integerTicks={true}
+                            showLines={true}
+                            regressionOption={false}
+                        />
                     )}
+
 
                         <DataTable
                             selectedTable={selectedTable || []}

@@ -10,7 +10,7 @@ const MARGIN = { top: 60, right: 60, bottom: 60, left: 60 };
 const uniquePositions = ['PG', 'SG', 'SF', 'PF', 'C']; 
 const colorScale = d3.scaleOrdinal().domain(uniquePositions).range(d3.schemeCategory10);
 
-export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integerTicks = false, showLegend = false, showLines = false}) => {
+export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integerTicks = false, showLegend = false, showLines = false, regressionOption = true}) => {
     const boundsWidth = width - MARGIN.right - MARGIN.left;
     const boundsHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -147,6 +147,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
 
     return (
         <div>
+            {regressionOption && (
             <div style={{ marginBottom: '10px' }}>
                 <label>
                     <input type="checkbox" checked={showRegressionLine} onChange={() => setShowRegressionLine(!showRegressionLine)}/>
@@ -171,6 +172,7 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
                     )}
                 </div>
             </div>
+            )}
 
             <Row></Row>
             <svg width={width} height={height}>
@@ -179,8 +181,8 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
                     <g transform={`translate(0, ${boundsHeight})`}>
                         <AxisBottom xScale={xScale} pixelsPerTick={40} height={boundsHeight} formatTick={integerTicks} />
                     </g>
-                    {allLines} {/* Render the lines */}
-                    {allShapes} {/* Render the scatterplot points */}
+                    {allLines} 
+                    {allShapes}
                     {showRegressionLine && (
                         <line
                             x1={xScale(linePoints[0].x)}
@@ -199,7 +201,6 @@ export const Scatterplot = ({ width, height, data, xAxisLabel, yAxisLabel, integ
                     </text>
                 </g>
             </svg>
-
             {showLegend && (
             <Legend
                 positions={uniquePositions}
