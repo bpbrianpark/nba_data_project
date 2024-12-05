@@ -113,3 +113,49 @@ def get_column_name(col_name):
     except Exception as e:
         print(f"Error: {e}") 
         return jsonify({"error": str(e)}), 500
+    
+# Get player stats
+@routes.route('/get_yearly_stats_all_cols/<int:pid>/<string:table_prefix>/', methods=['GET'])
+def get_yearly_stats_all_cols(pid, table_prefix):
+    try:
+        years = range(2022, 2025)  # Adjust the range as necessary
+        con = None
+        con = connect_to_db(con)
+        cur = con.cursor()
+        stats = []
+
+        for year in years:
+            table_name = f"{table_prefix}_{year}"
+            try:
+                # Fetch all column names dynamically for the table
+                cur.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}'")
+                columns = [row[0] for row in cur.fetchall()]
+
+                # Fetch data for the player across all columns
+                query = f"SELECT {', '.join(columns)} FROM {table_name} WHERE pid = {pid}"
+                cur.execute(query)
+                rows = cur.fetchall()
+
+                if rows:
+                    # Combine columns with their values
+                    for row in rows:
+                        stats.append({
+                            "year": year,
+                            "data": {col: val for col, val in zip(columns, row)}
+                        })
+
+            except Exception as table_error:
+                print(f"Skipping table {table_name}: {table_error}")
+
+        cur.close()
+        con.close()
+
+        if not stats:
+            return jsonify({"message": "Player data doesn't exist in the given years"}), 404
+        
+        return jsonify({"pid": pid, "stats": stats}), 200
+
+    except Exception as e:
+        print(f"Error: {e}") 
+        return jsonify({"error": str(e)}), 500
+
