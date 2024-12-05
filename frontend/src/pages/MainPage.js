@@ -86,7 +86,8 @@ const MainPage = () => {
                             <Button variant="info" size="lg" onClick={() => navigate('/database')}>Main Page</Button>
                             <Button variant="info" size="lg" onClick={() => navigate('/query')}>Query</Button>
                             <Button variant="info" size="lg" onClick={() => navigate('/graph')}>Graph</Button>
-
+                            <Button variant='info' size='lg' onClick={() => navigate('/playerpage')}>Player</Button>
+                            <Button variant='info' size='lg' onClick={() => navigate('/playeroutlook')}>Player Outlook</Button>
                             <Form.Select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(e.target.value)}
